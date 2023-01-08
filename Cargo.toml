@@ -1,0 +1,14 @@
+[package]
+name = "ark-blst"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+blstrs = { version = "^0.6.1", features = ["__private_bench"] }
+ark-ec = { version = "0.4.0-alpha.7" }
+ark-ff = { version = "0.4.0-alpha.7" }
+ff = "0.12"
+num-traits = "^0.2.15"
+zeroize = "1.5.7"
