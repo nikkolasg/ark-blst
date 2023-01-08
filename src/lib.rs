@@ -3,8 +3,14 @@ use core::{
     fmt,
     ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign},
 };
+
+use ark_serialize::{
+    buffer_byte_size, CanonicalDeserialize, CanonicalDeserializeWithFlags, CanonicalSerialize,
+    CanonicalSerializeWithFlags, Compress, EmptyFlags, Flags, SerializationError, Valid, Validate,
+};
 use ff::Field;
 use num_traits::{One, Zero};
+use std::iter;
 use std::{hash::Hasher, ops::Deref};
 use zeroize::Zeroize;
 
@@ -181,7 +187,7 @@ impl Hash for Fp {
 impl ark_ff::Field for Fp {
     type BasePrimeField = Fp;
 
-    type BasePrimeFieldIter;
+    type BasePrimeFieldIter = iter::Once<Self::BasePrimeField>;
 
     const SQRT_PRECOMP: Option<ark_ff::SqrtPrecomputation<Self>> = None;
 
@@ -194,17 +200,21 @@ impl ark_ff::Field for Fp {
     }
 
     fn to_base_prime_field_elements(&self) -> Self::BasePrimeFieldIter {
-        todo!()
+        iter::once(*self)
     }
 
     fn from_base_prime_field_elems(elems: &[Self::BasePrimeField]) -> Option<Self> {
-        todo!()
+        if elems.len() != (Self::extension_degree() as usize) {
+            return None;
+        }
+        Some(elems[0])
     }
 
     fn from_base_prime_field(elem: Self::BasePrimeField) -> Self {
         elem
     }
 
+    #[inline]
     fn double(&self) -> Self {
         Fp(self.0.double())
     }
@@ -218,7 +228,9 @@ impl ark_ff::Field for Fp {
     }
 
     fn from_random_bytes_with_flags<F: Flags>(bytes: &[u8]) -> Option<(Self, F)> {
-        todo!()
+        let blst_buffer = [0u8; 48];
+        blst_buffer[..].copy_from_slice(bytes);
+        blstrs::Fp::from_bytes_le(&blst_buffer);
     }
 
     fn legendre(&self) -> ark_ff::LegendreSymbol {
