@@ -3,6 +3,7 @@ use core::{
     fmt,
     ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign},
 };
+use std::io::Empty;
 
 use ark_serialize::{
     CanonicalDeserialize, CanonicalSerialize, Compress, Flags, SerializationError, Valid, Validate,
