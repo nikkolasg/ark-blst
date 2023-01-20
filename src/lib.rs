@@ -7,7 +7,7 @@ use std::io::Empty;
 use std::ops::{Div, DivAssign};
 use std::str::FromStr;
 
-use ark_ff::{BigInt, UniformRand};
+use ark_ff::{BigInt, PrimeField, UniformRand};
 use ark_serialize::{
     CanonicalDeserialize, CanonicalSerialize, Compress, EmptyFlags, Flags, SerializationError,
     Valid, Validate,
@@ -465,13 +465,30 @@ impl FromStr for Fp {
 //    }
 //}
 
+impl From<ark_bls12_381::Fq> for Fp {
+    fn from(value: ark_bls12_381::Fq) -> Self {
+        Fp::from(value.into_bigint())
+    }
+}
+
 impl ark_ff::FftField for Fp {
-    const GENERATOR: Self = <ark_bls12_381::Fq as ark_ff::FftField>::GENERATOR;
+    const GENERATOR: Self = Fp::one();
 
     const TWO_ADICITY: u32 = <ark_bls12_381::Fq as ark_ff::FftField>::TWO_ADICITY;
 
-    const TWO_ADIC_ROOT_OF_UNITY: Self =
-        <ark_bls12_381::Fq as ark_ff::FftField>::TWO_ADIC_ROOT_OF_UNITY;
+    const TWO_ADIC_ROOT_OF_UNITY: Self = Fp::from(<ark_bls12_381::Fq as ark_ff::FftField>::TWO_ADIC_ROOT_OF_UNITY);
+}
+
+impl Into<num_bigint::BigUint> for Fp {
+    fn into(self) -> num_bigint::BigUint {
+        self.0.into()
+    }
+}
+
+impl Into<<Fp as PrimeField>::BigInt> for Fp {
+    fn into(self) -> <Fp as PrimeField>::BigInt {
+        self.0.into()
+    }
 }
 
 impl ark_ff::PrimeField for Fp {
@@ -491,7 +508,7 @@ impl ark_ff::PrimeField for Fp {
         <ark_bls12_381::Fq as ark_ff::PrimeField>::TRACE_MINUS_ONE_DIV_TWO;
 
     fn from_bigint(repr: Self::BigInt) -> Option<Self> {
-        Some(Fp(blstrs::Fp::from_raw_unchecked(repr)))
+        Some(Fp(blstrs::Fp::from_raw_unchecked(repr.0)))
     }
 
     fn into_bigint(self) -> Self::BigInt {
