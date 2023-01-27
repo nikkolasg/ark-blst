@@ -652,8 +652,11 @@ impl ark_serialize::CanonicalSerialize for Fp {
 
 #[cfg(test)]
 mod tests {
+    use super::Fp;
     use ark_ff::BigInteger;
     use ark_ff::PrimeField;
+    use ark_ff::UniformRand;
+    use ark_serialize::CanonicalSerialize;
     use blst::*;
 
     fn print_slice_hex(slice: &[u64]) -> String {
@@ -667,6 +670,14 @@ mod tests {
             "]",
         ]
         .concat()
+    }
+
+    fn serialize_to_blst<const N: usize>(e: ark_ff::BigInt<N>) -> blstrs::Fp {
+        let mut blst_buffer = [0u8; 48];
+        //e.serialize_compressed(&mut blst_buffer[..]).unwrap();
+        // blstrs::Fp::from_bytes_le(&blst_buffer).unwrap()
+        blst_buffer.copy_from_slice(&e.to_bytes_le());
+        blstrs::Fp::from_bytes_le(&blst_buffer).unwrap()
     }
     fn print_info<F: PrimeField>() {
         println!("MODULUS: {}", print_slice_hex(F::MODULUS.as_ref()));
@@ -683,32 +694,46 @@ mod tests {
 
     #[test]
     fn test_fq_modulus() {
-        const printed_modulus: [u64; 6] = [
-            0xb9feffffffffaaab,
-            0x1eabfffeb153ffff,
-            0x6730d2a0f6b0f624,
-            0x64774b84f38512bf,
-            0x4b1ba7b6434bacd7,
-            0x1a0111ea397fe69a,
-        ];
-        const modo: super::Fp = super::Fp(blstrs::Fp(blst_fp { l: printed_modulus }));
-        println!("{:?}", modo);
+        print_info_fq();
         const slice_mod_minus_one_div_two: [u64; 6] = [
-            0xdcff7fffffffd555,
-            0xf55ffff58a9ffff,
-            0xb39869507b587b12,
-            0xb23ba5c279c2895f,
-            0x258dd3db21a5d66b,
-            0xd0088f51cbff34d,
+            0xa1fafffffffe5557,
+            0x995bfff976a3fffe,
+            0x3f41d24d174ceb4,
+            0xf6547998c1995dbd,
+            0x778a468f507a6034,
+            0x20559931f7f8103,
         ];
+
         const modmodt: super::Fp = super::Fp(blstrs::Fp(blst_fp {
             l: slice_mod_minus_one_div_two,
         }));
-        println!("0x{}", hex::encode(modmodt.to_bytes_le()));
+        let manual_blst = modmodt.to_bytes_le();
+        let serialized_from_arkworks =
+            serialize_to_blst(ark_bls12_381::Fq::MODULUS_MINUS_ONE_DIV_TWO);
+        let arkwork_version = ark_bls12_381::Fq::MODULUS_MINUS_ONE_DIV_TWO.to_bytes_le();
+        //assert_eq!(manual_blst, arkwork_version);
+        assert_eq!(manual_blst, serialized_from_arkworks.to_bytes_le());
+        println!("MANUAL: 0x{}", hex::encode(manual_blst));
         println!(
-            "0x{}",
-            hex::encode(ark_bls12_381::Fq::MODULUS_MINUS_ONE_DIV_TWO.to_bytes_le())
+            "SERIALIZED: 0x{}",
+            hex::encode(serialized_from_arkworks.to_bytes_le())
         );
+        println!("ARKWORKS: 0x{}", hex::encode(arkwork_version));
+
+        println!(
+            "slice from blst serialized: {}",
+            print_slice_hex(serialized_from_arkworks.0.l.as_ref())
+        );
+
+        let r1 = ark_bls12_381::Fq::rand(&mut rand::thread_rng());
+        let bg = r1.into_bigint();
+        let slice = bg.as_ref();
+        let arr: [u64; 6] = [slice[5], slice[4], slice[3], slice[2], slice[1], slice[0]];
+        let r2 = blstrs::Fp::from_raw_unchecked(arr);
+        let mut v1 = Vec::new();
+        r1.serialize_compressed(&mut v1).unwrap();
+        println!("arkworks random: {}", hex::encode(v1));
+        println!("blst random: {}", hex::encode(r2.to_bytes_le()));
     }
 
     //    #[test]
