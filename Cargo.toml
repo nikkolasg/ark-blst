@@ -19,6 +19,12 @@ num-traits = "^0.2.15"
 zeroize = "1.5.7"
 rand = "^0.8.5"
 hex = "0.4"
+byteorder = "1.4.3"
+
+[dev-dependencies]
+ark-algebra-test-templates = { version = "0.4.0-alpha.6" }
+
 
 [patch.crates-io]
 blstrs = { git = "https://github.com/nikkolasg/blstrs", branch = "feat/arkwork" }
+# blstrs = { path = "../blstrs" }
