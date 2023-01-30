@@ -237,6 +237,7 @@ impl Valid for Fp {
     }
 }
 
+#[allow(clippy::redundant_closure)]
 impl ark_serialize::CanonicalDeserialize for Fp {
     fn deserialize_with_mode<R: ark_serialize::Read>(
         mut reader: R,
@@ -284,11 +285,11 @@ impl ark_serialize::CanonicalSerializeWithFlags for Fp {
         writer: W,
         _flags: F,
     ) -> Result<(), SerializationError> {
-        Self::serialize_with_mode(&self, writer, Compress::No)
+        Self::serialize_with_mode(self, writer, Compress::No)
     }
 
     fn serialized_size_with_flags<F: Flags>(&self) -> usize {
-        Self::serialized_size(&self, Compress::No)
+        Self::serialized_size(self, Compress::No)
     }
 }
 
@@ -341,6 +342,7 @@ impl core::iter::Sum<Fp> for Fp {
     }
 }
 
+#[allow(clippy::suspicious_arithmetic_impl)]
 impl Div<Fp> for Fp {
     type Output = Fp;
 
@@ -353,7 +355,7 @@ impl<'a> Div<&'a mut Fp> for Fp {
     type Output = Fp;
 
     fn div(self, rhs: &'a mut Fp) -> Self::Output {
-        let mut c = self.clone();
+        let mut c = self;
         c.div_assign(rhs);
         c
     }
@@ -362,23 +364,27 @@ impl<'a> Div<&'a Fp> for Fp {
     type Output = Fp;
 
     fn div(self, rhs: &'a Fp) -> Self::Output {
-        let mut c = self.clone();
+        let mut c = self;
         c.div_assign(rhs);
         c
     }
 }
+
+#[allow(clippy::suspicious_op_assign_impl)]
 impl DivAssign for Fp {
     fn div_assign(&mut self, rhs: Self) {
         *self *= Fp(rhs.0.invert().unwrap());
     }
 }
 
+#[allow(clippy::suspicious_op_assign_impl)]
 impl<'a> DivAssign<&'a Fp> for Fp {
     fn div_assign(&mut self, rhs: &'a Fp) {
         *self *= Fp(rhs.0.invert().unwrap());
     }
 }
 
+#[allow(clippy::suspicious_op_assign_impl)]
 impl<'a> DivAssign<&'a mut Fp> for Fp {
     fn div_assign(&mut self, rhs: &'a mut Fp) {
         *self *= Fp(rhs.0.invert().unwrap());
@@ -464,18 +470,17 @@ impl From<ark_bls12_381::Fq> for Fp {
         Fp::from(value.into_bigint())
     }
 }
-
-impl Into<num_bigint::BigUint> for Fp {
-    fn into(self) -> num_bigint::BigUint {
-        let slice = self.0.to_bytes_le();
+impl From<Fp> for num_bigint::BigUint {
+    fn from(value: Fp) -> Self {
+        let slice = value.0.to_bytes_le();
         let s = memory::constant_size_to_slice(&slice);
         num_bigint::BigUint::from_bytes_le(s)
     }
 }
 
-impl Into<<Fp as PrimeField>::BigInt> for Fp {
-    fn into(self) -> <Fp as PrimeField>::BigInt {
-        let bg: num_bigint::BigUint = self.into();
+impl From<Fp> for <Fp as PrimeField>::BigInt {
+    fn from(value: Fp) -> Self {
+        let bg: num_bigint::BigUint = value.into();
         BigInt::<6>::try_from(bg).unwrap()
     }
 }
@@ -593,6 +598,7 @@ impl ark_ff::Field for Fp {
         self
     }
 
+    #[allow(clippy::redundant_closure)]
     fn inverse(&self) -> Option<Self> {
         self.0.invert().map(|f| Fp(f)).into()
     }
@@ -618,6 +624,7 @@ impl ark_ff::Field for Fp {
         Self::from_random_bytes_with_flags::<EmptyFlags>(bytes).map(|f| f.0)
     }
 
+    #[allow(clippy::redundant_closure)]
     fn sqrt(&self) -> Option<Self> {
         match Self::SQRT_PRECOMP {
             Some(tv) => tv.sqrt(self),
@@ -723,6 +730,7 @@ mod tests {
     #[test]
     fn test_fq_modulus() {
         print_info_fq();
+        #[allow(non_upper_case_globals)]
         const slice_mod_minus_one_div_two: [u64; 6] = [
             0xa1fafffffffe5557,
             0x995bfff976a3fffe,
@@ -732,6 +740,7 @@ mod tests {
             0x20559931f7f8103,
         ];
 
+        #[allow(non_upper_case_globals)]
         const modmodt: super::Fp = super::Fp(blstrs::Fp(blst_fp {
             l: slice_mod_minus_one_div_two,
         }));
