@@ -170,8 +170,7 @@ impl Mul<&Fp> for Fp {
 
     #[inline]
     fn mul(mut self, rhs: &Fp) -> Fp {
-        self.0.mul_assign(rhs.0);
-        self
+        Fp(self.0 * rhs.0)
     }
 }
 
@@ -179,8 +178,7 @@ impl Mul<Fp> for Fp {
     type Output = Fp;
     #[inline]
     fn mul(mut self, rhs: Fp) -> Fp {
-        self.0.mul_assign(rhs.0);
-        self
+        Fp(self.0 * rhs.0)
     }
 }
 
@@ -189,9 +187,7 @@ impl Mul<&Fp> for &Fp {
 
     #[inline]
     fn mul(self, rhs: &Fp) -> Fp {
-        let mut out = *self;
-        out *= rhs;
-        out
+        Fp(self.0 * rhs.0)
     }
 }
 
@@ -199,7 +195,7 @@ impl<'a> Mul<&'a mut Fp> for Fp {
     type Output = Fp;
 
     fn mul(self, rhs: &'a mut Fp) -> Self::Output {
-        Fp(self.0.mul(rhs.0))
+        Fp(self.0 * rhs.0)
     }
 }
 
