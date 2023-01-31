@@ -18,37 +18,39 @@ jobs:
       - id: msrv
         run: echo "::set-output name=msrv::$(echo $MSRV)"
 
-  linux_foreign:
-    strategy:
-      matrix:
-        include:
-          # 64-bit Linux/arm64
-          - target: aarch64-unknown-linux-gnu
-            rust: nightly
-            arch: aarch64
-
-    runs-on: ubuntu-18.04
-    steps:
-      - uses: actions/checkout@v2
-      - uses: uraimo/run-on-arch-action@v2.5.0
-        name: Run commands
-        id: runcmd
-        with:
-          arch: aarch64
-          distro: ubuntu18.04
-
-          # Not required, but speeds up builds by storing container images in
-          # a GitHub package registry.
-          githubToken: ${{ github.token }}
-
-          install: |
-            apt-get update -q -y
-            apt-get install -q -y ocl-icd-opencl-dev curl build-essential
-            curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal --default-toolchain ${{ matrix.rust }} -y
-            source $HOME/.cargo/env
-
-          run: |
-            $HOME/.cargo/bin/cargo test --release --target ${{ matrix.target }}
+  # NOTE vmx 2023-01-31: Commented out as it takes quite some time to run and
+  # is not needed a the moment.
+  #linux_foreign:
+  #  strategy:
+  #    matrix:
+  #      include:
+  #        # 64-bit Linux/arm64
+  #        - target: aarch64-unknown-linux-gnu
+  #          rust: nightly
+  #          arch: aarch64
+  #
+  #  runs-on: ubuntu-18.04
+  #  steps:
+  #    - uses: actions/checkout@v2
+  #    - uses: uraimo/run-on-arch-action@v2.5.0
+  #      name: Run commands
+  #      id: runcmd
+  #      with:
+  #        arch: aarch64
+  #        distro: ubuntu18.04
+  #
+  #        # Not required, but speeds up builds by storing container images in
+  #        # a GitHub package registry.
+  #        githubToken: ${{ github.token }}
+  #
+  #        install: |
+  #          apt-get update -q -y
+  #          apt-get install -q -y ocl-icd-opencl-dev curl build-essential
+  #          curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal --default-toolchain ${{ matrix.rust }} -y
+  #          source $HOME/.cargo/env
+  #
+  #        run: |
+  #          $HOME/.cargo/bin/cargo test --release --target ${{ matrix.target }}
 
   # Linux tests
   linux:
@@ -56,13 +58,15 @@ jobs:
     strategy:
       matrix:
         include:
-          # 32-bit Linux/x86
-          - target: i686-unknown-linux-gnu
-            rust: ${{needs.set-msrv.outputs.msrv}}
-            deps: sudo apt update && sudo apt install gcc-multilib
-          - target: i686-unknown-linux-gnu
-            rust: stable
-            deps: sudo apt update && sudo apt install gcc-multilib
+          # NOTE vmx 2023-01-31: Commented out as it takes quite some time to run and
+          # is not needed a the moment.
+          ## 32-bit Linux/x86
+          #- target: i686-unknown-linux-gnu
+          #  rust: ${{needs.set-msrv.outputs.msrv}}
+          #  deps: sudo apt update && sudo apt install gcc-multilib
+          #- target: i686-unknown-linux-gnu
+          #  rust: stable
+          #  deps: sudo apt update && sudo apt install gcc-multilib
 
           # 64-bit Linux/x86_64
           - target: x86_64-unknown-linux-gnu
@@ -104,27 +108,29 @@ jobs:
           override: true
       - run: cargo test
 
- # Windows tests
-  windows:
-    needs: set-msrv
-    strategy:
-      matrix:
-        include:
-          # 64-bit Windows (MSVC)
-          - target: x86_64-pc-windows-msvc
-            toolchain: stable
-
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: ${{ matrix.toolchain }}
-          target: ${{ matrix.target }}
-          override: true
-      - uses: msys2/setup-msys2@v2
-      - run: cargo test --target ${{ matrix.target }}
+  # NOTE vmx 2023-01-31: Commented out as it takes quite some time to run and
+  # is not needed a the moment.
+  ## Windows tests
+  #windows:
+  #  needs: set-msrv
+  #  strategy:
+  #    matrix:
+  #      include:
+  #        # 64-bit Windows (MSVC)
+  #        - target: x86_64-pc-windows-msvc
+  #          toolchain: stable
+  #
+  #  runs-on: windows-latest
+  #  steps:
+  #    - uses: actions/checkout@v2
+  #    - uses: actions-rs/toolchain@v1
+  #      with:
+  #        profile: minimal
+  #        toolchain: ${{ matrix.toolchain }}
+  #        target: ${{ matrix.target }}
+  #        override: true
+  #    - uses: msys2/setup-msys2@v2
+  #    - run: cargo test --target ${{ matrix.target }}
 
   clippy_check:
     runs-on: ubuntu-latest
