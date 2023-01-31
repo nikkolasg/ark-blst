@@ -34,7 +34,7 @@ const MODULUS_BIGINT: ark_ff::BigInteger384 = ark_ff::BigInt::<6>(MODULUS);
 
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, PartialOrd, Ord)]
 #[repr(transparent)]
-pub struct Fp(blstrs::Fp);
+pub struct Fp(pub blstrs::Fp);
 
 impl Deref for Fp {
     type Target = blstrs::Fp;
@@ -789,21 +789,6 @@ mod tests {
 
     #[test]
     fn fp_tests() {
-        let r = Fp::rand(&mut rand::thread_rng());
-        let s = Fp::rand(&mut rand::thread_rng());
-        let rps = r + s;
-        assert!(rps.neg() + rps == Fp::zero());
-        let spr = s + r;
-        assert_eq!(rps, spr);
-
-        let rps = r * s;
-        assert!(rps.div(rps) == Fp::one());
-        let spr = s * r;
-        assert_eq!(rps, spr);
-
-        let mut buff = Vec::new();
-        r.serialize_compressed(&mut buff).unwrap();
-        let r2 = Fp::deserialize_compressed(&buff[..]).unwrap();
-        assert_eq!(r, r2);
+        crate::tests::field_test::<Fp>();
     }
 }
