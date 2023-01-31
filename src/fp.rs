@@ -34,7 +34,7 @@ const MODULUS_BIGINT: ark_ff::BigInteger384 = ark_ff::BigInt::<6>(MODULUS);
 
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, PartialOrd, Ord)]
 #[repr(transparent)]
-pub struct Fp(pub blstrs::Fp);
+pub struct Fp(pub(crate) blstrs::Fp);
 
 impl Deref for Fp {
     type Target = blstrs::Fp;
