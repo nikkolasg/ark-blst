@@ -211,7 +211,7 @@ impl Zero for Fp {
 
 impl Zeroize for Fp {
     fn zeroize(&mut self) {
-        self.0 = blstrs::Fp::from(0);
+        self.0 = blstrs::Fp::from(0u64);
     }
 }
 // TODO check invariant
@@ -420,17 +420,7 @@ impl<'a> Sub<&'a mut Fp> for Fp {
     }
 }
 
-//impl rand::distribution::Standard for Fp
-//where
-//    rand::distributions::Standard: rand::distributions::Distribution<u64>,
-//{
-//    fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> Self {
-//        Fp(blstrs::Fp::random(rng))
-//    }
-//}
-
 impl ark_ff::UniformRand for Fp {
-    //fn rand<R: ark_std::rand::RngCore + ark_std::rand::CryptoRng>(rng: &mut R) -> Self {
     fn rand<R: ark_std::rand::Rng + ?Sized>(rng: &mut R) -> Self {
         Fp(blstrs::Fp::random(rng))
     }
@@ -574,12 +564,13 @@ impl ark_ff::Field for Fp {
         self
     }
 
-    fn from_random_bytes_with_flags<F: Flags>(bytes: &[u8]) -> Option<(Self, F)> {
-        let mut blst_buffer = [0u8; 48];
-        blst_buffer[..].copy_from_slice(bytes);
-        blstrs::Fp::from_bytes_le(&blst_buffer)
-            .map(|fp| (Fp(fp), F::from_u8(0).unwrap()))
-            .into()
+    fn from_random_bytes_with_flags<F: Flags>(_bytes: &[u8]) -> Option<(Self, F)> {
+        unimplemented!()
+        //let mut blst_buffer = [0u8; 48];
+        //blst_buffer[..].copy_from_slice(bytes);
+        //blstrs::Fp::from_bytes_le(&blst_buffer)
+        //    .map(|fp| (Fp(fp), F::from_u8(0).unwrap()))
+        //    .into()
     }
 
     fn legendre(&self) -> ark_ff::LegendreSymbol {

@@ -199,7 +199,7 @@ impl Zero for Fp2 {
 
 impl Zeroize for Fp2 {
     fn zeroize(&mut self) {
-        self.0 = blstrs::Fp2::from(0);
+        self.0 = blstrs::Fp2::zero();
     }
 }
 
@@ -380,7 +380,7 @@ impl<'a> Add<&'a mut Fp2> for Fp2 {
     type Output = Fp2;
 
     fn add(self, rhs: &'a mut Fp2) -> Self::Output {
-        Fp2(self.0.add(rhs.0))
+        Fp2(self.0 + rhs.0)
     }
 }
 
@@ -388,7 +388,7 @@ impl Sub<Fp2> for Fp2 {
     type Output = Fp2;
 
     fn sub(self, rhs: Fp2) -> Self::Output {
-        Fp2(self.0.sub(rhs.0))
+        Fp2(self.0 - rhs.0)
     }
 }
 
@@ -396,7 +396,7 @@ impl<'a> Sub<&'a Fp2> for Fp2 {
     type Output = Fp2;
 
     fn sub(self, rhs: &'a Fp2) -> Self::Output {
-        Fp2(self.0.sub(rhs.0))
+        Fp2(self.0 - rhs.0)
     }
 }
 
@@ -404,7 +404,7 @@ impl<'a> Sub<&'a mut Fp2> for Fp2 {
     type Output = Fp2;
 
     fn sub(self, rhs: &'a mut Fp2) -> Self::Output {
-        Fp2(self.0.sub(rhs.0))
+        Fp2(self.0 - rhs.0)
     }
 }
 
@@ -433,7 +433,7 @@ impl From<BigInt<12>> for Fp2 {
 
 impl From<ark_bls12_381::Fq2> for Fp2 {
     fn from(value: ark_bls12_381::Fq2) -> Self {
-        let mut buff = Vec::new();
+        let mut buff = Vec::with_capacity(96);
         value.serialize_compressed(&mut buff).unwrap();
         Fp2(blstrs::Fp2::from_bytes_le(memory::slice_to_constant_size(&buff)).unwrap())
     }
@@ -506,12 +506,13 @@ impl ark_ff::Field for Fp2 {
         self
     }
 
-    fn from_random_bytes_with_flags<F: Flags>(bytes: &[u8]) -> Option<(Self, F)> {
-        let mut blst_buffer = [0u8; 96];
-        blst_buffer[..].copy_from_slice(bytes);
-        blstrs::Fp2::from_bytes_le(&blst_buffer)
-            .map(|fp| (Fp2(fp), F::from_u8(0).unwrap()))
-            .into()
+    fn from_random_bytes_with_flags<F: Flags>(_bytes: &[u8]) -> Option<(Self, F)> {
+        unimplemented!()
+        //let mut blst_buffer = [0u8; 96];
+        //blst_buffer[..].copy_from_slice(bytes);
+        //blstrs::Fp2::from_bytes_le(&blst_buffer)
+        //    .map(|fp| (Fp2(fp), F::from_u8(0).unwrap()))
+        //    .into()
     }
 
     fn legendre(&self) -> ark_ff::LegendreSymbol {

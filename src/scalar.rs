@@ -403,7 +403,6 @@ impl<'a> Sub<&'a mut Scalar> for Scalar {
 }
 
 impl ark_ff::UniformRand for Scalar {
-    //fn rand<R: ark_std::rand::RngCore + ark_std::rand::CryptoRng>(rng: &mut R) -> Self {
     fn rand<R: ark_std::rand::Rng + ?Sized>(rng: &mut R) -> Self {
         Scalar(blstrs::Scalar::random(rng))
     }
@@ -543,11 +542,12 @@ impl ark_ff::Field for Scalar {
         self
     }
 
-    fn from_random_bytes_with_flags<F: Flags>(bytes: &[u8]) -> Option<(Self, F)> {
-        let blst_buffer: &[u8; 32] = memory::slice_to_constant_size(bytes);
-        blstrs::Scalar::from_bytes_le(blst_buffer)
-            .map(|fp| (Scalar(fp), F::from_u8(0).unwrap()))
-            .into()
+    fn from_random_bytes_with_flags<F: Flags>(_bytes: &[u8]) -> Option<(Self, F)> {
+        unimplemented!()
+        //let blst_buffer: &[u8; 32] = memory::slice_to_constant_size(bytes);
+        //blstrs::Scalar::from_bytes_le(blst_buffer)
+        //    .map(|fp| (Scalar(fp), F::from_u8(0).unwrap()))
+        //    .into()
     }
 
     fn legendre(&self) -> ark_ff::LegendreSymbol {
@@ -559,8 +559,7 @@ impl ark_ff::Field for Scalar {
     }
 
     fn square_in_place(&mut self) -> &mut Self {
-        self.0 = self.0.square();
-        self
+        unimplemented!()
     }
 
     #[allow(clippy::redundant_closure)]

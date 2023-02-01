@@ -380,7 +380,7 @@ impl<'a> Add<&'a mut Fp6> for Fp6 {
     type Output = Fp6;
 
     fn add(self, rhs: &'a mut Fp6) -> Self::Output {
-        Fp6(self.0.add(rhs.0))
+        Fp6(self.0 + rhs.0)
     }
 }
 
@@ -388,7 +388,7 @@ impl Sub<Fp6> for Fp6 {
     type Output = Fp6;
 
     fn sub(self, rhs: Fp6) -> Self::Output {
-        Fp6(self.0.sub(rhs.0))
+        Fp6(self.0 - rhs.0)
     }
 }
 
@@ -396,7 +396,7 @@ impl<'a> Sub<&'a Fp6> for Fp6 {
     type Output = Fp6;
 
     fn sub(self, rhs: &'a Fp6) -> Self::Output {
-        Fp6(self.0.sub(rhs.0))
+        Fp6(self.0 - rhs.0)
     }
 }
 
@@ -404,7 +404,7 @@ impl<'a> Sub<&'a mut Fp6> for Fp6 {
     type Output = Fp6;
 
     fn sub(self, rhs: &'a mut Fp6) -> Self::Output {
-        Fp6(self.0.sub(rhs.0))
+        Fp6(self.0 - rhs.0)
     }
 }
 
@@ -433,7 +433,7 @@ impl From<BigInt<12>> for Fp6 {
 
 impl From<ark_bls12_381::Fq2> for Fp6 {
     fn from(value: ark_bls12_381::Fq2) -> Self {
-        let mut buff = Vec::new();
+        let mut buff = Vec::with_capacity(288);
         value.serialize_compressed(&mut buff).unwrap();
         Fp6(blstrs::Fp6::from_bytes_le(memory::slice_to_constant_size(&buff)).unwrap())
     }
@@ -511,11 +511,12 @@ impl ark_ff::Field for Fp6 {
         self
     }
 
-    fn from_random_bytes_with_flags<F: Flags>(bytes: &[u8]) -> Option<(Self, F)> {
-        let blst_buffer: &[u8; 288] = memory::slice_to_constant_size(bytes);
-        blstrs::Fp6::from_bytes_le(blst_buffer)
-            .map(|fp| (Fp6(fp), F::from_u8(0).unwrap()))
-            .into()
+    fn from_random_bytes_with_flags<F: Flags>(_bytes: &[u8]) -> Option<(Self, F)> {
+        unimplemented!()
+        //let blst_buffer: &[u8; 288] = memory::slice_to_constant_size(bytes);
+        //blstrs::Fp6::from_bytes_le(blst_buffer)
+        //    .map(|fp| (Fp6(fp), F::from_u8(0).unwrap()))
+        //    .into()
     }
 
     fn legendre(&self) -> ark_ff::LegendreSymbol {
