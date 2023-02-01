@@ -308,7 +308,12 @@ impl_from!(u8);
 impl_from!(u16);
 impl_from!(u32);
 impl_from!(u64);
-impl_from!(u128);
+
+impl From<u128> for Fp {
+    fn from(value: u128) -> Self {
+        Fp(blstrs::Fp::from(value))
+    }
+}
 
 impl<'a> core::iter::Product<&'a Fp> for Fp {
     fn product<I: Iterator<Item = &'a Fp>>(iter: I) -> Self {
