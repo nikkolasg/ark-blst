@@ -255,7 +255,7 @@ impl ark_serialize::CanonicalSerialize for Fp6 {
     }
 
     fn serialized_size(&self, _compress: Compress) -> usize {
-        48
+        288
     }
 }
 
