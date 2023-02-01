@@ -45,8 +45,6 @@ jobs:
           shared-key: cache-${{ hashFiles('**/Cargo.lock') }}
           cache-on-failure: true
     
-      ## only care about the packages we code not the bindings because they are
-      ## sometimes broken
       - name: cargo fmt
         run: cargo +nightly fmt -- --check
 
