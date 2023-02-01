@@ -23,7 +23,7 @@ use zeroize::Zeroize;
 
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, PartialOrd, Ord)]
 #[repr(transparent)]
-pub struct Fp6(blstrs::Fp6);
+pub struct Fp6(pub(crate) blstrs::Fp6);
 
 impl Deref for Fp6 {
     type Target = blstrs::Fp6;

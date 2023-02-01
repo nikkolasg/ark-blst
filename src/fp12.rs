@@ -1,5 +1,4 @@
-use crate::fp::Fp;
-use crate::fp2::Fp2;
+use crate::fp6::Fp6;
 use crate::memory;
 use core::hash::Hash;
 use core::{
@@ -63,9 +62,8 @@ impl Add<Fp12> for Fp12 {
     type Output = Fp12;
 
     #[inline]
-    fn add(mut self, rhs: Fp12) -> Fp12 {
-        self += &rhs;
-        self
+    fn add(self, rhs: Fp12) -> Fp12 {
+        Fp12(self.0 + rhs.0)
     }
 }
 
@@ -74,9 +72,7 @@ impl Add<&Fp12> for &Fp12 {
 
     #[inline]
     fn add(self, rhs: &Fp12) -> Fp12 {
-        let mut out = *self;
-        out += rhs;
-        out
+        Fp12(self.0 + rhs.0)
     }
 }
 
@@ -84,7 +80,7 @@ impl Add<&Fp12> for Fp12 {
     type Output = Fp12;
     #[inline]
     fn add(self, rhs: &Fp12) -> Fp12 {
-        Fp12(self.0.add(rhs.0))
+        Fp12(self.0 + rhs.0)
     }
 }
 impl Neg for &Fp12 {
@@ -129,9 +125,7 @@ impl Sub<&Fp12> for &Fp12 {
 
     #[inline]
     fn sub(self, rhs: &Fp12) -> Fp12 {
-        let mut out = *self;
-        out.0 -= rhs.0;
-        out
+        Fp12(self.0 - rhs.0)
     }
 }
 
@@ -158,18 +152,16 @@ impl Mul<&Fp12> for Fp12 {
     type Output = Fp12;
 
     #[inline]
-    fn mul(mut self, rhs: &Fp12) -> Fp12 {
-        self.0.mul_assign(rhs.0);
-        self
+    fn mul(self, rhs: &Fp12) -> Fp12 {
+        Fp12(self.0 * rhs.0)
     }
 }
 
 impl Mul<Fp12> for Fp12 {
     type Output = Fp12;
     #[inline]
-    fn mul(mut self, rhs: Fp12) -> Fp12 {
-        self.0.mul_assign(rhs.0);
-        self
+    fn mul(self, rhs: Fp12) -> Fp12 {
+        Fp12(self.0 * rhs.0)
     }
 }
 
@@ -178,9 +170,7 @@ impl Mul<&Fp12> for &Fp12 {
 
     #[inline]
     fn mul(self, rhs: &Fp12) -> Fp12 {
-        let mut out = *self;
-        out *= rhs;
-        out
+        Fp12(self.0 * rhs.0)
     }
 }
 
@@ -188,7 +178,7 @@ impl<'a> Mul<&'a mut Fp12> for Fp12 {
     type Output = Fp12;
 
     fn mul(self, rhs: &'a mut Fp12) -> Self::Output {
-        Fp12(self.0.mul(rhs.0))
+        Fp12(self.0 * rhs.0)
     }
 }
 
@@ -452,37 +442,32 @@ impl From<Fp12> for num_bigint::BigUint {
 }
 
 impl Fp12 {
-    pub const fn new(c0: Fp2, c1: Fp2, c2: Fp2) -> Self {
-        Fp12(blstrs::Fp12::new(c0.0, c1.0, c2.0))
+    pub const fn new(c0: Fp6, c1: Fp6) -> Self {
+        Fp12(blstrs::Fp12::new(c0.0, c1.0))
     }
 }
 type BaseFieldIter<P> = <P as ark_ff::Field>::BasePrimeFieldIter;
-const FP2ZERO: Fp2 = <Fp2 as ark_ff::Field>::ZERO;
+const FP6ZERO: Fp6 = <Fp6 as ark_ff::Field>::ZERO;
+const FP6ONE: Fp6 = <Fp6 as ark_ff::Field>::ONE;
 impl ark_ff::Field for Fp12 {
     type BasePrimeField = crate::fp::Fp;
 
-    type BasePrimeFieldIter =
-        iter::Chain<iter::Chain<BaseFieldIter<Fp2>, BaseFieldIter<Fp2>>, BaseFieldIter<Fp2>>;
+    type BasePrimeFieldIter = iter::Chain<BaseFieldIter<Fp6>, BaseFieldIter<Fp6>>;
 
     const SQRT_PRECOMP: Option<ark_ff::SqrtPrecomputation<Self>> = None;
 
-    const ZERO: Self = Fp12::new(FP2ZERO, FP2ZERO, FP2ZERO);
+    const ZERO: Self = Fp12::new(FP6ZERO, FP6ZERO);
 
-    const ONE: Self = Fp12::new(
-        Fp2(blstrs::Fp2::new(blstrs::fp::R, blstrs::fp::ZERO)),
-        FP2ZERO,
-        FP2ZERO,
-    );
+    const ONE: Self = Fp12::new(FP6ONE, FP6ZERO);
 
     fn extension_degree() -> u64 {
-        Self::BasePrimeField::extension_degree() * 6
+        Self::BasePrimeField::extension_degree() * 12
     }
 
     fn to_base_prime_field_elements(&self) -> Self::BasePrimeFieldIter {
-        Fp2(self.0.c0())
+        Fp6(self.0.c0())
             .to_base_prime_field_elements()
-            .chain(Fp2(self.0.c1()).to_base_prime_field_elements())
-            .chain(Fp2(self.0.c2()).to_base_prime_field_elements())
+            .chain(Fp6(self.0.c1()).to_base_prime_field_elements())
     }
 
     fn from_base_prime_field_elems(elems: &[Self::BasePrimeField]) -> Option<Self> {
@@ -491,14 +476,13 @@ impl ark_ff::Field for Fp12 {
         }
         let base_ext_deg = Self::BasePrimeField::extension_degree() as usize;
         Some(Self::new(
-            Fp2::from_base_prime_field_elems(&elems[0..base_ext_deg]).unwrap(),
-            Fp2::from_base_prime_field_elems(&elems[base_ext_deg..]).unwrap(),
-            Fp2::from_base_prime_field_elems(&elems[base_ext_deg..]).unwrap(),
+            Fp6::from_base_prime_field_elems(&elems[0..base_ext_deg]).unwrap(),
+            Fp6::from_base_prime_field_elems(&elems[base_ext_deg..]).unwrap(),
         ))
     }
 
     fn from_base_prime_field(elem: Self::BasePrimeField) -> Self {
-        Self::new(Fp2::from_base_prime_field(elem), Fp2::ZERO, Fp2::ZERO)
+        Self::new(Fp6::from_base_prime_field(elem), FP6ZERO)
     }
 
     #[inline]
@@ -517,7 +501,7 @@ impl ark_ff::Field for Fp12 {
     }
 
     fn from_random_bytes_with_flags<F: Flags>(bytes: &[u8]) -> Option<(Self, F)> {
-        let blst_buffer: &[u8; 288] = memory::slice_to_constant_size(bytes);
+        let blst_buffer: &[u8; 576] = memory::slice_to_constant_size(bytes);
         blstrs::Fp12::from_bytes_le(blst_buffer)
             .map(|fp| (Fp12(fp), F::from_u8(0).unwrap()))
             .into()
