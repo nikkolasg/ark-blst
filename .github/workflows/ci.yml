@@ -1,0 +1,52 @@
+name: CI
+
+on: [pull_request, push]
+
+jobs:
+  cargo-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Install toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: 1.63
+          profile: minimal
+          override: true
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: cache-${{ hashFiles('**/Cargo.lock') }}
+          cache-on-failure: true
+        
+      - name: cargo test
+        run: cargo test --workspace --all-features
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
+
+      - name: Install toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          profile: minimal
+          components: rustfmt, clippy
+          override: true
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: cache-${{ hashFiles('**/Cargo.lock') }}
+          cache-on-failure: true
+    
+      - name: cargo fmt
+        run: cargo +nightly fmt -- --check
+
+      - name: cargo clippy
+        run: cargo +nightly clippy --all --all-features -- -D clippy::all

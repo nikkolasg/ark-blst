@@ -215,7 +215,8 @@ impl Zeroize for Fp {
     }
 }
 // TODO check invariant
-#[allow(clippy::derived_hash_with_manual_eq)]
+#[allow(unknown_lints, renamed_and_removed_lints)]
+#[allow(clippy::derived_hash_with_manual_eq, clippy::derive_hash_xor_eq)]
 impl Hash for Fp {
     fn hash<H: Hasher>(&self, state: &mut H) {
         state.write(&self.0.to_bytes_le()[..]);
