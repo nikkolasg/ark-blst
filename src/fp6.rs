@@ -1,4 +1,3 @@
-use crate::fp::Fp;
 use crate::fp2::Fp2;
 use crate::memory;
 use core::hash::Hash;
@@ -63,9 +62,8 @@ impl Add<Fp6> for Fp6 {
     type Output = Fp6;
 
     #[inline]
-    fn add(mut self, rhs: Fp6) -> Fp6 {
-        self += &rhs;
-        self
+    fn add(self, rhs: Fp6) -> Fp6 {
+        Fp6(self.0 + rhs.0)
     }
 }
 
@@ -74,9 +72,7 @@ impl Add<&Fp6> for &Fp6 {
 
     #[inline]
     fn add(self, rhs: &Fp6) -> Fp6 {
-        let mut out = *self;
-        out += rhs;
-        out
+        Fp6(self.0 + rhs.0)
     }
 }
 
@@ -84,7 +80,7 @@ impl Add<&Fp6> for Fp6 {
     type Output = Fp6;
     #[inline]
     fn add(self, rhs: &Fp6) -> Fp6 {
-        Fp6(self.0.add(rhs.0))
+        Fp6(self.0 + rhs.0)
     }
 }
 impl Neg for &Fp6 {
@@ -129,9 +125,7 @@ impl Sub<&Fp6> for &Fp6 {
 
     #[inline]
     fn sub(self, rhs: &Fp6) -> Fp6 {
-        let mut out = *self;
-        out.0 -= rhs.0;
-        out
+        Fp6(self.0 - rhs.0)
     }
 }
 
@@ -158,18 +152,16 @@ impl Mul<&Fp6> for Fp6 {
     type Output = Fp6;
 
     #[inline]
-    fn mul(mut self, rhs: &Fp6) -> Fp6 {
-        self.0.mul_assign(rhs.0);
-        self
+    fn mul(self, rhs: &Fp6) -> Fp6 {
+        Fp6(self.0 * rhs.0)
     }
 }
 
 impl Mul<Fp6> for Fp6 {
     type Output = Fp6;
     #[inline]
-    fn mul(mut self, rhs: Fp6) -> Fp6 {
-        self.0.mul_assign(rhs.0);
-        self
+    fn mul(self, rhs: Fp6) -> Fp6 {
+        Fp6(self.0 * rhs.0)
     }
 }
 
@@ -178,9 +170,7 @@ impl Mul<&Fp6> for &Fp6 {
 
     #[inline]
     fn mul(self, rhs: &Fp6) -> Fp6 {
-        let mut out = *self;
-        out *= rhs;
-        out
+        Fp6(self.0 * rhs.0)
     }
 }
 
@@ -188,7 +178,7 @@ impl<'a> Mul<&'a mut Fp6> for Fp6 {
     type Output = Fp6;
 
     fn mul(self, rhs: &'a mut Fp6) -> Self::Output {
-        Fp6(self.0.mul(rhs.0))
+        Fp6(self.0 * rhs.0)
     }
 }
 

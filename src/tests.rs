@@ -1,5 +1,4 @@
 use ark_ff::Field;
-use ark_ff::UniformRand;
 
 pub fn field_test<F: Field>() {
     let r = F::rand(&mut rand::thread_rng());

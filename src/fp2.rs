@@ -62,9 +62,8 @@ impl Add<Fp2> for Fp2 {
     type Output = Fp2;
 
     #[inline]
-    fn add(mut self, rhs: Fp2) -> Fp2 {
-        self += &rhs;
-        self
+    fn add(self, rhs: Fp2) -> Fp2 {
+        Fp2(self.0 + rhs.0)
     }
 }
 
@@ -73,9 +72,7 @@ impl Add<&Fp2> for &Fp2 {
 
     #[inline]
     fn add(self, rhs: &Fp2) -> Fp2 {
-        let mut out = *self;
-        out += rhs;
-        out
+        Fp2(self.0 + rhs.0)
     }
 }
 
@@ -83,7 +80,7 @@ impl Add<&Fp2> for Fp2 {
     type Output = Fp2;
     #[inline]
     fn add(self, rhs: &Fp2) -> Fp2 {
-        Fp2(self.0.add(rhs.0))
+        Fp2(self.0 + rhs.0)
     }
 }
 impl Neg for &Fp2 {
@@ -128,9 +125,7 @@ impl Sub<&Fp2> for &Fp2 {
 
     #[inline]
     fn sub(self, rhs: &Fp2) -> Fp2 {
-        let mut out = *self;
-        out.0 -= rhs.0;
-        out
+        Fp2(self.0 - rhs.0)
     }
 }
 
@@ -157,18 +152,16 @@ impl Mul<&Fp2> for Fp2 {
     type Output = Fp2;
 
     #[inline]
-    fn mul(mut self, rhs: &Fp2) -> Fp2 {
-        self.0.mul_assign(rhs.0);
-        self
+    fn mul(self, rhs: &Fp2) -> Fp2 {
+        Fp2(self.0 * rhs.0)
     }
 }
 
 impl Mul<Fp2> for Fp2 {
     type Output = Fp2;
     #[inline]
-    fn mul(mut self, rhs: Fp2) -> Fp2 {
-        self.0.mul_assign(rhs.0);
-        self
+    fn mul(self, rhs: Fp2) -> Fp2 {
+        Fp2(self.0 * rhs.0)
     }
 }
 
@@ -177,9 +170,7 @@ impl Mul<&Fp2> for &Fp2 {
 
     #[inline]
     fn mul(self, rhs: &Fp2) -> Fp2 {
-        let mut out = *self;
-        out *= rhs;
-        out
+        Fp2(self.0 * rhs.0)
     }
 }
 
@@ -187,7 +178,7 @@ impl<'a> Mul<&'a mut Fp2> for Fp2 {
     type Output = Fp2;
 
     fn mul(self, rhs: &'a mut Fp2) -> Self::Output {
-        Fp2(self.0.mul(rhs.0))
+        Fp2(self.0 * rhs.0)
     }
 }
 

@@ -74,9 +74,8 @@ impl Add<Fp> for Fp {
     type Output = Fp;
 
     #[inline]
-    fn add(mut self, rhs: Fp) -> Fp {
-        self += &rhs;
-        self
+    fn add(self, rhs: Fp) -> Fp {
+        Fp(self.0 + rhs.0)
     }
 }
 
@@ -85,9 +84,7 @@ impl Add<&Fp> for &Fp {
 
     #[inline]
     fn add(self, rhs: &Fp) -> Fp {
-        let mut out = *self;
-        out += rhs;
-        out
+        Fp(self.0 + rhs.0)
     }
 }
 
@@ -95,7 +92,7 @@ impl Add<&Fp> for Fp {
     type Output = Fp;
     #[inline]
     fn add(self, rhs: &Fp) -> Fp {
-        Fp(self.0.add(rhs.0))
+        Fp(self.0 + rhs.0)
     }
 }
 impl Neg for &Fp {
@@ -140,9 +137,7 @@ impl Sub<&Fp> for &Fp {
 
     #[inline]
     fn sub(self, rhs: &Fp) -> Fp {
-        let mut out = *self;
-        out.0 -= rhs.0;
-        out
+        Fp(self.0 - rhs.0)
     }
 }
 
@@ -169,7 +164,7 @@ impl Mul<&Fp> for Fp {
     type Output = Fp;
 
     #[inline]
-    fn mul(mut self, rhs: &Fp) -> Fp {
+    fn mul(self, rhs: &Fp) -> Fp {
         Fp(self.0 * rhs.0)
     }
 }
@@ -177,7 +172,7 @@ impl Mul<&Fp> for Fp {
 impl Mul<Fp> for Fp {
     type Output = Fp;
     #[inline]
-    fn mul(mut self, rhs: Fp) -> Fp {
+    fn mul(self, rhs: Fp) -> Fp {
         Fp(self.0 * rhs.0)
     }
 }
@@ -679,7 +674,6 @@ mod tests {
     use ark_ff::BigInteger;
     use ark_ff::FftField;
     use ark_ff::PrimeField;
-    use ark_ff::UniformRand;
     use blst::*;
 
     fn print_slice_hex(slice: &[u64]) -> String {
