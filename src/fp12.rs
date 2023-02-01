@@ -199,7 +199,7 @@ impl Zero for Fp12 {
 
 impl Zeroize for Fp12 {
     fn zeroize(&mut self) {
-        self.0 = blstrs::Fp12::from(blstrs::Fp::from(0));
+        self.0 = blstrs::Fp12::from(blstrs::Fp::from(0u64));
     }
 }
 
@@ -560,10 +560,7 @@ impl ark_ff::Field for Fp12 {
     }
 
     fn sqrt_in_place(&mut self) -> Option<&mut Self> {
-        (*self).sqrt().map(|sqrt| {
-            *self = sqrt;
-            self
-        })
+        unimplemented!("sqrt_in_place not implemented for Fp12")
     }
 
     fn sum_of_products<const T: usize>(a: &[Self; T], b: &[Self; T]) -> Self {

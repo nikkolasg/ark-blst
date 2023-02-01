@@ -566,10 +566,7 @@ impl ark_ff::Field for Fp6 {
     }
 
     fn sqrt_in_place(&mut self) -> Option<&mut Self> {
-        (*self).sqrt().map(|sqrt| {
-            *self = sqrt;
-            self
-        })
+        unimplemented!("sqrt_in_place not implemented for Fp6")
     }
 
     fn sum_of_products<const T: usize>(a: &[Self; T], b: &[Self; T]) -> Self {
