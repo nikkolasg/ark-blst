@@ -88,7 +88,7 @@ impl Neg for &Fp2 {
 
     #[inline]
     fn neg(self) -> Fp2 {
-        Fp2(self.0.neg())
+        Fp2(-self.0)
     }
 }
 
@@ -349,9 +349,7 @@ impl<'a> Div<&'a Fp2> for Fp2 {
     type Output = Fp2;
 
     fn div(self, rhs: &'a Fp2) -> Self::Output {
-        let mut c = self;
-        c.div_assign(rhs);
-        c
+        self * Fp2(rhs.0.invert().unwrap())
     }
 }
 
