@@ -579,16 +579,7 @@ impl ark_ff::Field for Fp2 {
     }
 
     fn pow<S: AsRef<[u64]>>(&self, exp: S) -> Self {
-        let mut res = Self::one();
-
-        for i in ark_ff::BitIteratorBE::without_leading_zeros(exp) {
-            res.square_in_place();
-
-            if i {
-                res *= self;
-            }
-        }
-        res
+        Fp2(self.0.pow_vartime(exp.as_ref()))
     }
 
     fn pow_with_table<S: AsRef<[u64]>>(powers_of_2: &[Self], exp: S) -> Option<Self> {
