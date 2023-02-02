@@ -44,6 +44,7 @@ impl Deref for Fp {
     }
 }
 
+// TODO vmx 2023-01-31: Should the debug output be the same as for other arkworks implementations?
 impl fmt::Display for Fp {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:?}", self.0)
