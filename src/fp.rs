@@ -34,7 +34,7 @@ const MODULUS_BIGINT: ark_ff::BigInteger384 = ark_ff::BigInt::<6>(MODULUS);
 
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, PartialOrd, Ord)]
 #[repr(transparent)]
-pub struct Fp(blstrs::Fp);
+pub struct Fp(pub(crate) blstrs::Fp);
 
 impl Deref for Fp {
     type Target = blstrs::Fp;
@@ -74,9 +74,8 @@ impl Add<Fp> for Fp {
     type Output = Fp;
 
     #[inline]
-    fn add(mut self, rhs: Fp) -> Fp {
-        self += &rhs;
-        self
+    fn add(self, rhs: Fp) -> Fp {
+        Fp(self.0 + rhs.0)
     }
 }
 
@@ -85,9 +84,7 @@ impl Add<&Fp> for &Fp {
 
     #[inline]
     fn add(self, rhs: &Fp) -> Fp {
-        let mut out = *self;
-        out += rhs;
-        out
+        Fp(self.0 + rhs.0)
     }
 }
 
@@ -95,7 +92,7 @@ impl Add<&Fp> for Fp {
     type Output = Fp;
     #[inline]
     fn add(self, rhs: &Fp) -> Fp {
-        Fp(self.0.add(rhs.0))
+        Fp(self.0 + rhs.0)
     }
 }
 impl Neg for &Fp {
@@ -140,9 +137,7 @@ impl Sub<&Fp> for &Fp {
 
     #[inline]
     fn sub(self, rhs: &Fp) -> Fp {
-        let mut out = *self;
-        out.0 -= rhs.0;
-        out
+        Fp(self.0 - rhs.0)
     }
 }
 
@@ -169,18 +164,16 @@ impl Mul<&Fp> for Fp {
     type Output = Fp;
 
     #[inline]
-    fn mul(mut self, rhs: &Fp) -> Fp {
-        self.0.mul_assign(rhs.0);
-        self
+    fn mul(self, rhs: &Fp) -> Fp {
+        Fp(self.0 * rhs.0)
     }
 }
 
 impl Mul<Fp> for Fp {
     type Output = Fp;
     #[inline]
-    fn mul(mut self, rhs: Fp) -> Fp {
-        self.0.mul_assign(rhs.0);
-        self
+    fn mul(self, rhs: Fp) -> Fp {
+        Fp(self.0 * rhs.0)
     }
 }
 
@@ -189,9 +182,7 @@ impl Mul<&Fp> for &Fp {
 
     #[inline]
     fn mul(self, rhs: &Fp) -> Fp {
-        let mut out = *self;
-        out *= rhs;
-        out
+        Fp(self.0 * rhs.0)
     }
 }
 
@@ -199,7 +190,7 @@ impl<'a> Mul<&'a mut Fp> for Fp {
     type Output = Fp;
 
     fn mul(self, rhs: &'a mut Fp) -> Self::Output {
-        Fp(self.0.mul(rhs.0))
+        Fp(self.0 * rhs.0)
     }
 }
 
@@ -220,7 +211,7 @@ impl Zero for Fp {
 
 impl Zeroize for Fp {
     fn zeroize(&mut self) {
-        self.0 = blstrs::Fp::from(0);
+        self.0 = blstrs::Fp::from(0u64);
     }
 }
 // TODO check invariant
@@ -317,7 +308,12 @@ impl_from!(u8);
 impl_from!(u16);
 impl_from!(u32);
 impl_from!(u64);
-impl_from!(u128);
+
+impl From<u128> for Fp {
+    fn from(value: u128) -> Self {
+        Fp(blstrs::Fp::from(value))
+    }
+}
 
 impl<'a> core::iter::Product<&'a Fp> for Fp {
     fn product<I: Iterator<Item = &'a Fp>>(iter: I) -> Self {
@@ -424,17 +420,7 @@ impl<'a> Sub<&'a mut Fp> for Fp {
     }
 }
 
-//impl rand::distribution::Standard for Fp
-//where
-//    rand::distributions::Standard: rand::distributions::Distribution<u64>,
-//{
-//    fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> Self {
-//        Fp(blstrs::Fp::random(rng))
-//    }
-//}
-
 impl ark_ff::UniformRand for Fp {
-    //fn rand<R: ark_std::rand::RngCore + ark_std::rand::CryptoRng>(rng: &mut R) -> Self {
     fn rand<R: ark_std::rand::Rng + ?Sized>(rng: &mut R) -> Self {
         Fp(blstrs::Fp::random(rng))
     }
@@ -578,12 +564,13 @@ impl ark_ff::Field for Fp {
         self
     }
 
-    fn from_random_bytes_with_flags<F: Flags>(bytes: &[u8]) -> Option<(Self, F)> {
-        let mut blst_buffer = [0u8; 48];
-        blst_buffer[..].copy_from_slice(bytes);
-        blstrs::Fp::from_bytes_le(&blst_buffer)
-            .map(|fp| (Fp(fp), F::from_u8(0).unwrap()))
-            .into()
+    fn from_random_bytes_with_flags<F: Flags>(_bytes: &[u8]) -> Option<(Self, F)> {
+        unimplemented!()
+        //let mut blst_buffer = [0u8; 48];
+        //blst_buffer[..].copy_from_slice(bytes);
+        //blstrs::Fp::from_bytes_le(&blst_buffer)
+        //    .map(|fp| (Fp(fp), F::from_u8(0).unwrap()))
+        //    .into()
     }
 
     fn legendre(&self) -> ark_ff::LegendreSymbol {
@@ -634,10 +621,7 @@ impl ark_ff::Field for Fp {
     }
 
     fn sqrt_in_place(&mut self) -> Option<&mut Self> {
-        (*self).sqrt().map(|sqrt| {
-            *self = sqrt;
-            self
-        })
+        unimplemented!("sqrt_in_place")
     }
 
     fn sum_of_products<const T: usize>(a: &[Self; T], b: &[Self; T]) -> Self {
@@ -655,16 +639,7 @@ impl ark_ff::Field for Fp {
     }
 
     fn pow<S: AsRef<[u64]>>(&self, exp: S) -> Self {
-        let mut res = Self::one();
-
-        for i in ark_ff::BitIteratorBE::without_leading_zeros(exp) {
-            res.square_in_place();
-
-            if i {
-                res *= self;
-            }
-        }
-        res
+        Fp(self.0.pow_vartime(exp.as_ref()))
     }
 
     fn pow_with_table<S: AsRef<[u64]>>(powers_of_2: &[Self], exp: S) -> Option<Self> {
@@ -684,7 +659,6 @@ mod tests {
     use ark_ff::BigInteger;
     use ark_ff::FftField;
     use ark_ff::PrimeField;
-    use ark_ff::UniformRand;
     use blst::*;
 
     fn print_slice_hex(slice: &[u64]) -> String {
@@ -790,21 +764,6 @@ mod tests {
 
     #[test]
     fn fp_tests() {
-        let r = Fp::rand(&mut rand::thread_rng());
-        let s = Fp::rand(&mut rand::thread_rng());
-        let rps = r + s;
-        assert!(rps.neg() + rps == Fp::zero());
-        let spr = s + r;
-        assert_eq!(rps, spr);
-
-        let rps = r * s;
-        assert!(rps.div(rps) == Fp::one());
-        let spr = s * r;
-        assert_eq!(rps, spr);
-
-        let mut buff = Vec::new();
-        r.serialize_compressed(&mut buff).unwrap();
-        let r2 = Fp::deserialize_compressed(&buff[..]).unwrap();
-        assert_eq!(r, r2);
+        crate::tests::field_test::<Fp>();
     }
 }

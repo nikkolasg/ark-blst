@@ -27,6 +27,6 @@ ark-algebra-test-templates = { version = "0.4.0-alpha.6" }
 
 
 [patch.crates-io]
-# blstrs = { git = "https://github.com/nikkolasg/blstrs", branch = "feat/arkwork" }
-blstrs = { git = "https://github.com/nikkolasg/blstrs", rev = "496c5810e3721b4ea15f24f5082e0950197f8725" }
+blstrs = { git = "https://github.com/nikkolasg/blstrs", branch = "feat/arkwork" }
+# blstrs = { git = "https://github.com/nikkolasg/blstrs", rev = "496c5810e3721b4ea15f24f5082e0950197f8725" }
 # blstrs = { path = "../blstrs" }
