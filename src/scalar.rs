@@ -636,7 +636,7 @@ impl ark_ff::Field for Scalar {
 mod tests {
     use super::*;
 
-            #[test]
+    #[test]
     fn fp_tests() {
         crate::tests::field_test::<Scalar>();
     }
