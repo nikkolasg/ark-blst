@@ -345,6 +345,8 @@ impl<'a> Div<&'a mut Fp2> for Fp2 {
         c
     }
 }
+
+#[allow(clippy::suspicious_arithmetic_impl)]
 impl<'a> Div<&'a Fp2> for Fp2 {
     type Output = Fp2;
 
