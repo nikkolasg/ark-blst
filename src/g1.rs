@@ -229,7 +229,7 @@ impl Add<&G1Affine> for G1Affine {
 
     #[inline]
     fn add(self, rhs: &G1Affine) -> Self::Output {
-        G1Projective(&self.0 + &blstrs::G1Projective::from(rhs.0))
+        G1Projective(self.0 + blstrs::G1Projective::from(rhs.0))
     }
 }
 
@@ -238,7 +238,7 @@ impl Add<G1Affine> for G1Affine {
 
     #[inline]
     fn add(self, rhs: G1Affine) -> Self::Output {
-        G1Projective(&self.0 + &blstrs::G1Projective::from(&rhs.0))
+        G1Projective(self.0 + blstrs::G1Projective::from(&rhs.0))
     }
 }
 
@@ -437,9 +437,7 @@ impl AffineRepr for G1Affine {
     }
 
     fn from_random_bytes(bytes: &[u8]) -> Option<Self> {
-        Option::from(
-            blstrs::G1Affine::from_uncompressed(bytes.try_into().unwrap()).map(|p| Self(p)),
-        )
+        Option::from(blstrs::G1Affine::from_uncompressed(bytes.try_into().unwrap()).map(Self))
     }
 
     fn mul_bigint(&self, by: impl AsRef<[u64]>) -> Self::Group {
@@ -736,7 +734,7 @@ impl<'a> core::iter::Sum<&'a G1Affine> for G1Projective {
     }
 }
 
-impl<'a> core::iter::Sum<G1Affine> for G1Projective {
+impl core::iter::Sum<G1Affine> for G1Projective {
     fn sum<I: Iterator<Item = G1Affine>>(iter: I) -> Self {
         iter.fold(Self::zero(), |sum, x| sum + x)
     }
@@ -750,7 +748,7 @@ impl<'a> core::iter::Sum<&'a Self> for G1Projective {
 }
 
 // In Arkworks `impl_additive_ops_from_ref!()` implements this.
-impl<'a> core::iter::Sum<Self> for G1Projective {
+impl core::iter::Sum<Self> for G1Projective {
     fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
         iter.fold(Self::zero(), |sum, x| sum + x)
     }
