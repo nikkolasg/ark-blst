@@ -23,8 +23,6 @@ use ark_std::{
 use group::{prime::PrimeCurveAffine, Curve as _, Group as _};
 use zeroize::Zeroize;
 
-use crate::memory;
-
 const COMPRESSED_SIZE: usize = 48;
 const UNCOMPRESSED_SIZE: usize = 96;
 
@@ -524,8 +522,7 @@ impl CanonicalDeserialize for G1Affine {
                     .read_exact(&mut bytes)
                     .ok()
                     .ok_or(SerializationError::InvalidData)?;
-                let array = memory::slice_to_constant_size(&bytes);
-                blstrs::G1Affine::from_compressed_unchecked(&array).unwrap()
+                blstrs::G1Affine::from_compressed_unchecked(&bytes).unwrap()
             }
             ark_serialize::Compress::No => {
                 let mut bytes = [0u8; UNCOMPRESSED_SIZE];
@@ -533,8 +530,7 @@ impl CanonicalDeserialize for G1Affine {
                     .read_exact(&mut bytes)
                     .ok()
                     .ok_or(SerializationError::InvalidData)?;
-                let array = memory::slice_to_constant_size(&bytes);
-                blstrs::G1Affine::from_uncompressed_unchecked(&array).unwrap()
+                blstrs::G1Affine::from_uncompressed_unchecked(&bytes).unwrap()
             }
         };
 
@@ -564,7 +560,6 @@ impl Deref for G1Projective {
 
 impl Default for G1Projective {
     fn default() -> Self {
-        // TODO vmx 2023-02-01: Check what arkworks uses as default.
         Self(blstrs::G1Projective::identity())
     }
 }
@@ -629,18 +624,21 @@ impl Group for G1Projective {
     }
 
     #[inline]
-    fn mul_bigint(&self, other: impl AsRef<[u64]>) -> Self {
-        // TODO vmx 2023-02-02: check if this code is actually doing the right thing. It was
-        // copied from `G1Affine::mul_bigint`.
-        let mut res = G1Projective::zero();
-        for b in ark_ff::BitIteratorBE::without_leading_zeros(other) {
-            res.double_in_place();
-            if b {
-                res += self
-            }
-        }
-
-        res
+    fn mul_bigint(&self, _other: impl AsRef<[u64]>) -> Self {
+        unimplemented!("mul_bigint")
+        // Better be safe then sorry. The function below is likely correct. We'll know once we use
+        // it.
+        //// TODO vmx 2023-02-02: check if this code is actually doing the right thing. It was
+        //// copied from `G1Affine::mul_bigint`.
+        //let mut res = G1Projective::zero();
+        //for b in ark_ff::BitIteratorBE::without_leading_zeros(other) {
+        //    res.double_in_place();
+        //    if b {
+        //        res += self
+        //    }
+        //}
+        //
+        //res
     }
 }
 
@@ -717,6 +715,9 @@ impl ScalarMul for G1Projective {
 
 impl VariableBaseMSM for G1Projective {
     fn msm(bases: &[Self::MulBase], bigints: &[Self::ScalarField]) -> Result<Self, usize> {
+        // NOTE vmx 2023-02-03: In trait bounds are relaxed (see
+        // https://github.com/arkworks-rs/algebra/issues/596 for more), then we wouldn't need to
+        // convert from affine to projective first.
         let blstrs_bases = bases
             .iter()
             .map(|base| G1Projective::from(*base).0)
