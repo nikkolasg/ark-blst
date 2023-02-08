@@ -57,10 +57,10 @@ pub fn group_test<G: CurveGroup>() {
         .iter()
         .zip(bases.iter())
         .fold(G::zero(), |acc, (s, b)| acc + b.mul(*s));
-    assert!(scalars.len() == bases.len());
+    assert_eq!(scalars.len(), bases.len());
     let affines = G::normalize_batch(&bases);
-    assert!(scalars.len() == affines.len());
+    assert_eq!(scalars.len(), affines.len());
     // msm from crate
     let res = <G as VariableBaseMSM>::msm(&affines, &scalars).unwrap();
-    assert!(exp == res);
+    assert_eq!(exp, res);
 }

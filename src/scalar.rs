@@ -440,6 +440,13 @@ impl From<ark_bls12_381::Fr> for Scalar {
         Scalar::from(value.into_bigint())
     }
 }
+
+impl From<Scalar> for blstrs::Scalar {
+    fn from(value: Scalar) -> Self {
+        value.0
+    }
+}
+
 impl From<Scalar> for num_bigint::BigUint {
     fn from(value: Scalar) -> Self {
         let slice = value.0.to_bytes_le();
