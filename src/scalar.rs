@@ -477,7 +477,7 @@ impl ark_ff::PrimeField for Scalar {
     const MODULUS_MINUS_ONE_DIV_TWO: Self::BigInt =
         <ark_bls12_381::Fr as ark_ff::PrimeField>::MODULUS_MINUS_ONE_DIV_TWO;
 
-    const MODULUS_BIT_SIZE: u32 = 255;
+    const MODULUS_BIT_SIZE: u32 = <ark_bls12_381::Fr as ark_ff::PrimeField>::MODULUS_BIT_SIZE;
 
     const TRACE: Self::BigInt = <ark_bls12_381::Fr as ark_ff::PrimeField>::TRACE;
 
@@ -544,10 +544,12 @@ impl ark_ff::Field for Scalar {
     }
 
     fn from_random_bytes_with_flags<F: Flags>(bytes: &[u8]) -> Option<(Self, F)> {
-        let blst_buffer: &[u8; 32] = memory::slice_to_constant_size(bytes);
-        blstrs::Scalar::from_bytes_le(blst_buffer)
-            .map(|fp| (Scalar(fp), F::from_u8(0).unwrap()))
-            .into()
+        ark_bls12_381::Fr::from_random_bytes_with_flags(bytes)
+            .map(|(f, flags)| (Scalar::from(f), flags))
+        //let blst_buffer: &[u8; 32] = memory::slice_to_constant_size(bytes);
+        //blstrs::Scalar::from_bytes_le(blst_buffer)
+        //    .map(|fp| (Scalar(fp), F::from_u8(0).unwrap()))
+        //    .into()
     }
 
     fn legendre(&self) -> ark_ff::LegendreSymbol {
