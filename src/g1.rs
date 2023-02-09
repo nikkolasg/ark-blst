@@ -524,8 +524,9 @@ impl CurveGroup for G1Projective {
     #[inline]
     fn normalize_batch(projective: &[Self]) -> Vec<Self::Affine> {
         let blstrs_projective = projective.iter().map(|p| p.0).collect::<Vec<_>>();
-        let mut blstrs_affine = Vec::with_capacity(projective.len());
-        blstrs::G1Projective::batch_normalize(&blstrs_projective, &mut blstrs_affine);
+        let mut blstrs_affine = vec![blstrs::G1Affine::identity(); projective.len()];
+        assert!(blstrs_projective.len() == blstrs_affine.len());
+        blstrs::G1Projective::batch_normalize(&blstrs_projective, &mut blstrs_affine[..]);
         blstrs_affine.into_iter().map(G1Affine).collect()
     }
 }
@@ -637,5 +638,16 @@ impl Neg for G1Projective {
     fn neg(mut self) -> Self {
         self.0 = -self.0;
         self
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::tests::group_test;
+
+    #[test]
+    fn g1() {
+        group_test::<G1Projective>();
     }
 }

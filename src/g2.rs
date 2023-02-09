@@ -515,8 +515,9 @@ impl CurveGroup for G2Projective {
     #[inline]
     fn normalize_batch(projective: &[Self]) -> Vec<Self::Affine> {
         let blstrs_projective = projective.iter().map(|p| p.0).collect::<Vec<_>>();
-        let mut blstrs_affine = Vec::with_capacity(projective.len());
-        blstrs::G2Projective::batch_normalize(&blstrs_projective, &mut blstrs_affine);
+        let mut blstrs_affine = vec![blstrs::G2Affine::identity(); projective.len()];
+        assert!(blstrs_projective.len() == blstrs_affine.len());
+        blstrs::G2Projective::batch_normalize(&blstrs_projective, &mut blstrs_affine[..]);
         blstrs_affine.into_iter().map(G2Affine).collect()
     }
 }
@@ -706,5 +707,16 @@ impl CanonicalDeserialize for G2Prepared {
         _validate: Validate,
     ) -> Result<Self, SerializationError> {
         todo!("canonical_deserialize")
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::tests::group_test;
+
+    #[test]
+    fn g2() {
+        group_test::<G2Projective>();
     }
 }

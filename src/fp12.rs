@@ -606,7 +606,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn fp6_tests() {
+    fn fp12_tests() {
         crate::tests::field_test::<Fp12>();
     }
 }

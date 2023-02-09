@@ -52,7 +52,7 @@ impl Pairing for Bls12 {
     ) -> MillerLoopOutput<Self> {
         let mut res = blst::blst_fp12::default();
 
-        for (i, (p, q)) in a.into_iter().zip(b).into_iter().enumerate() {
+        for (i, (p, q)) in a.into_iter().zip(b).enumerate() {
             let (p, q): (blstrs::G1Affine, blstrs::G2Prepared) = (p.into().into(), q.into().into());
             let mut tmp = blst::blst_fp12::default();
             if (p.is_identity() | q.is_identity()).into() {
@@ -77,5 +77,26 @@ impl Pairing for Bls12 {
         Some(PairingOutput(Fp12::from(blstrs::final_exponentiation(
             &f.0.into(),
         ))))
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::scalar::Scalar;
+
+    use super::*;
+    use ark_ec::CurveGroup;
+    use ark_ec::Group;
+    use ark_ff::UniformRand;
+    #[test]
+    fn pairing() {
+        let s1 = Scalar::rand(&mut rand::thread_rng());
+        let p1s = G1Projective::generator() * s1;
+        let p2 = G2Projective::generator();
+        let p1 = G1Projective::generator();
+        let p2s = G2Projective::generator() * s1;
+        let left = <Bls12 as Pairing>::pairing(p1s.into_affine(), p2.into_affine());
+        let right = <Bls12 as Pairing>::pairing(p1.into_affine(), p2s.into_affine());
+        assert!(left == right)
     }
 }
