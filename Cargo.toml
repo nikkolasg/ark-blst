@@ -27,8 +27,7 @@ group = "0.12.0"
 ark-algebra-test-templates = { version = "0.4.0" }
 
 [patch.crates-io]
-#blstrs = { git = "https://github.com/nikkolasg/blstrs", branch = "feat/arkwork" }
-blstrs = { git = "https://github.com/nikkolasg/blstrs", branch = "pub-macros" }
+blstrs = { git = "https://github.com/nikkolasg/blstrs", branch = "feat/arkwork" }
 ark-ec = { git = "https://github.com/vmx/algebra", branch = "affine-repr-xy-owned" }
 ark-ff = { git = "https://github.com/vmx/algebra", branch = "affine-repr-xy-owned" }
 ark-serialize = { git = "https://github.com/vmx/algebra", branch = "affine-repr-xy-owned" }
