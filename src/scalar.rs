@@ -456,7 +456,7 @@ impl From<Scalar> for <Scalar as PrimeField>::BigInt {
 }
 
 impl ark_ff::FftField for Scalar {
-    const GENERATOR: Self = Scalar(blstrs::scalar::R);
+    const GENERATOR: Self = Scalar(blstrs::scalar::GENERATOR);
 
     const TWO_ADICITY: u32 = blstrs::scalar::S;
 
@@ -668,7 +668,12 @@ mod tests {
     use super::*;
 
     #[test]
-    fn fp_tests() {
+    fn scalar() {
         crate::tests::field_test::<Scalar>();
+    }
+
+    #[test]
+    fn scalar_info() {
+        crate::fp::tests::print_info::<Scalar>();
     }
 }
