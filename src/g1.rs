@@ -1,9 +1,3 @@
-use core::{
-    fmt,
-    hash::{Hash, Hasher},
-    ops::{Add, AddAssign, Deref, Mul, MulAssign, Neg, Sub, SubAssign},
-};
-
 use ark_ec::{
     models::CurveConfig,
     scalar_mul::{variable_base::VariableBaseMSM, ScalarMul},
@@ -21,7 +15,13 @@ use ark_std::{
     },
 };
 use blstrs::{impl_add_sub, impl_add_sub_assign, impl_mul, impl_mul_assign};
+use core::{
+    fmt,
+    hash::{Hash, Hasher},
+    ops::{Add, AddAssign, Deref, Mul, MulAssign, Neg, Sub, SubAssign},
+};
 use group::{prime::PrimeCurveAffine, Curve as _, Group as _};
+use rand::SeedableRng;
 use zeroize::Zeroize;
 
 use crate::fp::Fp;
@@ -312,7 +312,14 @@ impl AffineRepr for G1Affine {
     }
 
     fn from_random_bytes(bytes: &[u8]) -> Option<Self> {
-        Option::from(blstrs::G1Affine::from_uncompressed(bytes.try_into().unwrap()).map(Self))
+        let mut b = [0u8; 32];
+        b.copy_from_slice(bytes);
+        Option::from(
+            G1Projective(<blstrs::G1Projective as group::Group>::random(
+                rand::rngs::StdRng::from_seed(b),
+            ))
+            .into_affine(),
+        )
     }
 
     fn mul_bigint(&self, by: impl AsRef<[u64]>) -> Self::Group {
