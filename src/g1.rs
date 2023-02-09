@@ -21,7 +21,6 @@ use core::{
     ops::{Add, AddAssign, Deref, Mul, MulAssign, Neg, Sub, SubAssign},
 };
 use group::{prime::PrimeCurveAffine, Curve as _, Group as _};
-use rand::SeedableRng;
 use zeroize::Zeroize;
 
 use crate::fp::Fp;
@@ -312,14 +311,7 @@ impl AffineRepr for G1Affine {
     }
 
     fn from_random_bytes(bytes: &[u8]) -> Option<Self> {
-        let mut b = [0u8; 32];
-        b.copy_from_slice(&bytes[..32]);
-        Option::from(
-            G1Projective(<blstrs::G1Projective as group::Group>::random(
-                rand::rngs::StdRng::from_seed(b),
-            ))
-            .into_affine(),
-        )
+        Option::from(blstrs::G1Affine::from_uncompressed(bytes.try_into().unwrap()).map(Self))
     }
 
     fn mul_bigint(&self, by: impl AsRef<[u64]>) -> Self::Group {

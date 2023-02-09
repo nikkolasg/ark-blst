@@ -543,12 +543,11 @@ impl ark_ff::Field for Scalar {
         self
     }
 
-    fn from_random_bytes_with_flags<F: Flags>(_bytes: &[u8]) -> Option<(Self, F)> {
-        unimplemented!()
-        //let blst_buffer: &[u8; 32] = memory::slice_to_constant_size(bytes);
-        //blstrs::Scalar::from_bytes_le(blst_buffer)
-        //    .map(|fp| (Scalar(fp), F::from_u8(0).unwrap()))
-        //    .into()
+    fn from_random_bytes_with_flags<F: Flags>(bytes: &[u8]) -> Option<(Self, F)> {
+        let blst_buffer: &[u8; 32] = memory::slice_to_constant_size(bytes);
+        blstrs::Scalar::from_bytes_le(blst_buffer)
+            .map(|fp| (Scalar(fp), F::from_u8(0).unwrap()))
+            .into()
     }
 
     fn legendre(&self) -> ark_ff::LegendreSymbol {
