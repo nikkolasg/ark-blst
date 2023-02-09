@@ -313,7 +313,7 @@ impl AffineRepr for G1Affine {
 
     fn from_random_bytes(bytes: &[u8]) -> Option<Self> {
         let mut b = [0u8; 32];
-        b.copy_from_slice(bytes);
+        b.copy_from_slice(&bytes[..32]);
         Option::from(
             G1Projective(<blstrs::G1Projective as group::Group>::random(
                 rand::rngs::StdRng::from_seed(b),

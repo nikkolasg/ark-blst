@@ -477,7 +477,7 @@ impl ark_ff::PrimeField for Scalar {
     const MODULUS_MINUS_ONE_DIV_TWO: Self::BigInt =
         <ark_bls12_381::Fr as ark_ff::PrimeField>::MODULUS_MINUS_ONE_DIV_TWO;
 
-    const MODULUS_BIT_SIZE: u32 = <ark_bls12_381::Fq as ark_ff::PrimeField>::MODULUS_BIT_SIZE;
+    const MODULUS_BIT_SIZE: u32 = 255;
 
     const TRACE: Self::BigInt = <ark_bls12_381::Fr as ark_ff::PrimeField>::TRACE;
 
