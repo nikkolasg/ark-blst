@@ -496,21 +496,20 @@ impl Group for G1Projective {
     }
 
     #[inline]
-    fn mul_bigint(&self, _other: impl AsRef<[u64]>) -> Self {
-        unimplemented!("mul_bigint")
+    fn mul_bigint(&self, other: impl AsRef<[u64]>) -> Self {
         // Better be safe then sorry. The function below is likely correct. We'll know once we use
         // it.
         //// TODO vmx 2023-02-02: check if this code is actually doing the right thing. It was
         //// copied from `G1Affine::mul_bigint`.
-        //let mut res = G1Projective::zero();
-        //for b in ark_ff::BitIteratorBE::without_leading_zeros(other) {
-        //    res.double_in_place();
-        //    if b {
-        //        res += self
-        //    }
-        //}
-        //
-        //res
+        let mut res = G1Projective::zero();
+        for b in ark_ff::BitIteratorBE::without_leading_zeros(other) {
+            res.double_in_place();
+            if b {
+                res += self
+            }
+        }
+
+        res
     }
 }
 
