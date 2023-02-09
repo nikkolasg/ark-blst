@@ -633,6 +633,18 @@ impl ark_ff::Field for Scalar {
     }
 }
 
+impl ark_crypto_primitives::sponge::Absorb for Scalar {
+    fn to_sponge_bytes(&self, dest: &mut Vec<u8>) {
+        let buff = self.0.to_bytes_le();
+        dest.copy_from_slice(&buff[..]);
+    }
+
+    fn to_sponge_field_elements<F: PrimeField>(&self, dest: &mut Vec<F>) {
+        // TODO do this manually
+        ark_bls12_381::Fr::from_bigint(self.into_bigint()).to_sponge_field_elements(dest);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
