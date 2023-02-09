@@ -32,7 +32,7 @@ impl CyclotomicMultSubgroup for Fp12 {
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
-struct Bls12;
+pub struct Bls12;
 
 impl Pairing for Bls12 {
     type BaseField = <G1Config as CurveConfig>::BaseField;
