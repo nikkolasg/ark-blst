@@ -242,6 +242,26 @@ impl From<blstrs::G1Projective> for G1Projective {
     }
 }
 
+impl From<G1Affine> for blstrs::G1Affine {
+    fn from(p: G1Affine) -> Self {
+        p.0
+    }
+}
+
+// This is implemented so that `G1Affine` can directly be used as `G1Prepared`.
+impl From<&G1Affine> for G1Affine {
+    fn from(p: &G1Affine) -> Self {
+        *p
+    }
+}
+
+// This is implemented so that `G1Affine` can directly be used as `G1Prepared`.
+impl From<&G1Projective> for G1Affine {
+    fn from(p: &G1Projective) -> Self {
+        p.into()
+    }
+}
+
 impl fmt::Display for G1Affine {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.0.is_identity().into() {

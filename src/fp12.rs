@@ -32,6 +32,18 @@ impl Deref for Fp12 {
     }
 }
 
+impl From<blstrs::Fp12> for Fp12 {
+    fn from(val: blstrs::Fp12) -> Self {
+        Fp12(val)
+    }
+}
+
+impl From<Fp12> for blstrs::Fp12 {
+    fn from(val: Fp12) -> Self {
+        val.0
+    }
+}
+
 impl fmt::Display for Fp12 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:?}", self.0)

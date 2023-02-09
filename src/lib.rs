@@ -5,6 +5,7 @@ pub(crate) mod fp6;
 pub(crate) mod g1;
 pub(crate) mod g2;
 pub(crate) mod memory;
+pub(crate) mod pairing;
 pub(crate) mod scalar;
 
 #[cfg(test)]
