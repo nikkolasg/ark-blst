@@ -515,8 +515,9 @@ impl CurveGroup for G2Projective {
     #[inline]
     fn normalize_batch(projective: &[Self]) -> Vec<Self::Affine> {
         let blstrs_projective = projective.iter().map(|p| p.0).collect::<Vec<_>>();
-        let mut blstrs_affine = Vec::with_capacity(projective.len());
-        blstrs::G2Projective::batch_normalize(&blstrs_projective, &mut blstrs_affine);
+        let mut blstrs_affine = vec![blstrs::G2Affine::identity(); projective.len()];
+        assert!(blstrs_projective.len() == blstrs_affine.len());
+        blstrs::G2Projective::batch_normalize(&blstrs_projective, &mut blstrs_affine[..]);
         blstrs_affine.into_iter().map(G2Affine).collect()
     }
 }
@@ -628,5 +629,94 @@ impl Neg for G2Projective {
     fn neg(mut self) -> Self {
         self.0 = -self.0;
         self
+    }
+}
+
+#[derive(Clone, Debug)]
+#[repr(transparent)]
+pub struct G2Prepared(blstrs::G2Prepared);
+
+impl G2Prepared {
+    pub fn is_identity(&self) -> bool {
+        self.0.is_identity().into()
+    }
+}
+
+impl Default for G2Prepared {
+    fn default() -> Self {
+        Self::from(G2Affine::generator())
+    }
+}
+
+impl From<G2Affine> for G2Prepared {
+    fn from(q: G2Affine) -> Self {
+        G2Prepared(blstrs::G2Prepared::from(q.0))
+    }
+}
+
+impl From<G2Projective> for G2Prepared {
+    fn from(q: G2Projective) -> Self {
+        q.into_affine().into()
+    }
+}
+
+impl From<&G2Affine> for G2Prepared {
+    fn from(other: &G2Affine) -> Self {
+        (*other).into()
+    }
+}
+
+impl From<&G2Projective> for G2Prepared {
+    fn from(q: &G2Projective) -> Self {
+        q.into_affine().into()
+    }
+}
+
+impl From<G2Prepared> for blstrs::G2Prepared {
+    fn from(p: G2Prepared) -> Self {
+        p.0
+    }
+}
+
+impl CanonicalSerialize for G2Prepared {
+    #[inline]
+    fn serialize_with_mode<W: Write>(
+        &self,
+        mut _writer: W,
+        _compress: Compress,
+    ) -> Result<(), SerializationError> {
+        todo!("canonical_serialize")
+    }
+
+    #[inline]
+    fn serialized_size(&self, _compress: Compress) -> usize {
+        todo!("canonical_serialize_size")
+    }
+}
+
+impl Valid for G2Prepared {
+    fn check(&self) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
+impl CanonicalDeserialize for G2Prepared {
+    fn deserialize_with_mode<R: Read>(
+        _reader: R,
+        _compress: Compress,
+        _validate: Validate,
+    ) -> Result<Self, SerializationError> {
+        todo!("canonical_deserialize")
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::tests::group_test;
+
+    #[test]
+    fn g2() {
+        group_test::<G2Projective>();
     }
 }
