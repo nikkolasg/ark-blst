@@ -559,7 +559,8 @@ impl ark_ff::Field for Scalar {
     }
 
     fn square_in_place(&mut self) -> &mut Self {
-        unimplemented!()
+        self.0 = self.0.square();
+        self
     }
 
     #[allow(clippy::redundant_closure)]
