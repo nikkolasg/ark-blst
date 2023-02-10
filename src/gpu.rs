@@ -126,8 +126,6 @@ where
     fn multiexp(
         &self,
         bases: &[G],
-        //exponents: &[<G::ScalarField as ark_ff::PrimeField>::BigInt],
-        //exponents: &[G::ScalarField],
         exponents: &[<G::ScalarField as ark_ff::PrimeField>::BigInt],
     ) -> Result<G::Group, EcError> {
         assert_eq!(bases.len(), exponents.len());
