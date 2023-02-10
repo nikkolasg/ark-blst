@@ -696,7 +696,10 @@ pub mod tests {
                     .as_ref()
             )
         );
-        println!("GENERATOR: {}", print_slice_hex(F::GENERATOR.into_bigint().as_ref()));
+        println!(
+            "GENERATOR: {}",
+            print_slice_hex(F::GENERATOR.into_bigint().as_ref())
+        );
     }
 
     #[test]
