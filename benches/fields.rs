@@ -19,8 +19,6 @@ pub fn bench_field_division<F: PrimeField>(b: &mut Bencher) {
     b.iter(|| r / s);
 }
 
-
-
 fn field_addition_benchmark(c: &mut Criterion) {
     let mut group = c.benchmark_group("Scalar Field Addition");
     group.bench_function("blst", |b| bench_field_addition::<ark_bls12_381::Fr>(b));
@@ -51,5 +49,5 @@ criterion_group!(
     field_addition_benchmark,
     field_multiplication_benchmark,
     field_division_benchmark,
-    );
+);
 criterion_main!(benches);
