@@ -22,7 +22,7 @@ pub fn field_test<F: Field>() {
     let r2 = F::deserialize_compressed(&buff[..]).unwrap();
     assert_eq!(r, r2);
 }
-
+use ark_ff::PrimeField;
 pub fn group_test<G: CurveGroup>() {
     let r = G::rand(&mut rand::thread_rng());
     let s = G::rand(&mut rand::thread_rng());
@@ -36,6 +36,9 @@ pub fn group_test<G: CurveGroup>() {
     assert!(rs + rs.neg() == G::zero());
     let mrs = r.mul(scalar.neg());
     assert!(rs + mrs == G::zero());
+
+    let r1 = r.mul_bigint(scalar.into_bigint());
+    assert!(rs == r1);
 
     let mut buff = Vec::new();
     r.serialize_compressed(&mut buff).unwrap();

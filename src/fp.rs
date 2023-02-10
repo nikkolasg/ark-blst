@@ -655,7 +655,7 @@ impl ark_ff::Field for Fp {
 }
 
 #[cfg(test)]
-mod tests {
+pub mod tests {
     use super::*;
     use ark_ff::BigInteger;
     use ark_ff::FftField;
@@ -682,7 +682,7 @@ mod tests {
         blst_buffer.copy_from_slice(&e.to_bytes_le());
         blstrs::Fp::from_bytes_le(&blst_buffer).unwrap()
     }
-    fn print_info<F: PrimeField>() {
+    pub fn print_info<F: PrimeField>() {
         println!("MODULUS: {}", print_slice_hex(F::MODULUS.as_ref()));
         println!(
             "MODULUS_MINUS_ONE_DIV_TWO: {}",
@@ -695,6 +695,10 @@ mod tests {
                     .into_bigint()
                     .as_ref()
             )
+        );
+        println!(
+            "GENERATOR: {}",
+            print_slice_hex(F::GENERATOR.into_bigint().as_ref())
         );
     }
 

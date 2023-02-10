@@ -456,7 +456,7 @@ impl From<Scalar> for <Scalar as PrimeField>::BigInt {
 }
 
 impl ark_ff::FftField for Scalar {
-    const GENERATOR: Self = Scalar(blstrs::scalar::R);
+    const GENERATOR: Self = Scalar(blstrs::scalar::GENERATOR);
 
     const TWO_ADICITY: u32 = blstrs::scalar::S;
 
@@ -477,7 +477,7 @@ impl ark_ff::PrimeField for Scalar {
     const MODULUS_MINUS_ONE_DIV_TWO: Self::BigInt =
         <ark_bls12_381::Fr as ark_ff::PrimeField>::MODULUS_MINUS_ONE_DIV_TWO;
 
-    const MODULUS_BIT_SIZE: u32 = <ark_bls12_381::Fq as ark_ff::PrimeField>::MODULUS_BIT_SIZE;
+    const MODULUS_BIT_SIZE: u32 = <ark_bls12_381::Fr as ark_ff::PrimeField>::MODULUS_BIT_SIZE;
 
     const TRACE: Self::BigInt = <ark_bls12_381::Fr as ark_ff::PrimeField>::TRACE;
 
@@ -543,8 +543,9 @@ impl ark_ff::Field for Scalar {
         self
     }
 
-    fn from_random_bytes_with_flags<F: Flags>(_bytes: &[u8]) -> Option<(Self, F)> {
-        unimplemented!()
+    fn from_random_bytes_with_flags<F: Flags>(bytes: &[u8]) -> Option<(Self, F)> {
+        ark_bls12_381::Fr::from_random_bytes_with_flags(bytes)
+            .map(|(f, flags)| (Scalar::from(f), flags))
         //let blst_buffer: &[u8; 32] = memory::slice_to_constant_size(bytes);
         //blstrs::Scalar::from_bytes_le(blst_buffer)
         //    .map(|fp| (Scalar(fp), F::from_u8(0).unwrap()))
@@ -560,7 +561,8 @@ impl ark_ff::Field for Scalar {
     }
 
     fn square_in_place(&mut self) -> &mut Self {
-        unimplemented!()
+        self.0 = self.0.square();
+        self
     }
 
     #[allow(clippy::redundant_closure)]
@@ -633,12 +635,45 @@ impl ark_ff::Field for Scalar {
     }
 }
 
+pub(crate) fn field_cast<'a, F1: PrimeField, F2: PrimeField>(
+    x: &[F1],
+    dest: &'a mut Vec<F2>,
+) -> Option<&'a mut Vec<F2>> {
+    if F1::characteristic() != F2::characteristic() {
+        // "Trying to absorb non-native field elements."
+        None
+    } else {
+        x.iter().for_each(|item| {
+            let bytes = item.into_bigint().to_bytes_le();
+            dest.push(F2::from_le_bytes_mod_order(&bytes))
+        });
+        Some(dest)
+    }
+}
+
+impl ark_crypto_primitives::sponge::Absorb for Scalar {
+    fn to_sponge_bytes(&self, dest: &mut Vec<u8>) {
+        self.serialize_compressed(dest).unwrap()
+    }
+
+    fn to_sponge_field_elements<F: PrimeField>(&self, dest: &mut Vec<F>) {
+        // TODO do this manually
+        // ark_bls12_381::Fr::from_bigint(self.into_bigint()).to_sponge_field_elements(dest);
+        let _ = field_cast(&[*self], dest);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn fp_tests() {
+    fn scalar() {
         crate::tests::field_test::<Scalar>();
+    }
+
+    #[test]
+    fn scalar_info() {
+        crate::fp::tests::print_info::<Scalar>();
     }
 }
