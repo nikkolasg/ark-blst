@@ -676,4 +676,5 @@ mod tests {
     fn scalar_info() {
         crate::fp::tests::print_info::<Scalar>();
     }
+
 }
