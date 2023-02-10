@@ -14,6 +14,8 @@ ark-ff = { version = "0.4.0" }
 ark-std = { version = "0.4.0" }
 ark-serialize = { version = "0.4.0" }
 blst = { version = "=0.3.10", default-features = true }
+ec-gpu = { version = "0.2.0", optional = true }
+ec-gpu-gen = { version = "0.5.1", optional = true }
 num-bigint = "^0.4.3"
 ff = "0.12"
 num-traits = "^0.2.15"
@@ -27,6 +29,15 @@ rand_xorshift = "0.3.0"
 
 [dev-dependencies]
 ark-algebra-test-templates = { version = "0.4.0" }
+
+[build-dependencies]
+blstrs = { version = "^0.6.1", features = ["__private_bench"] }
+ec-gpu-gen = "0.5.1"
+
+[features]
+default = []
+cuda = ["blstrs/gpu", "dep:ec-gpu", "dep:ec-gpu-gen", "ec-gpu-gen?/cuda"]
+opencl = ["blstrs/gpu", "dep:ec-gpu", "dep:ec-gpu-gen", "ec-gpu-gen?/opencl"]
 
 [patch.crates-io]
 blstrs = { git = "https://github.com/nikkolasg/blstrs", branch = "feat/arkwork" }

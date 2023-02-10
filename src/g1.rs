@@ -3,6 +3,8 @@ use ark_ec::{
     scalar_mul::{variable_base::VariableBaseMSM, ScalarMul},
     AffineRepr, CurveGroup, Group,
 };
+#[cfg(any(feature = "cuda", feature = "opencl"))]
+use ark_ff::PrimeField;
 use ark_ff::Zero;
 use ark_serialize::{
     CanonicalDeserialize, CanonicalSerialize, Compress, SerializationError, Valid, Validate,
@@ -238,6 +240,18 @@ impl From<G1Affine> for G1Projective {
 impl From<blstrs::G1Projective> for G1Projective {
     fn from(p: blstrs::G1Projective) -> Self {
         Self(p)
+    }
+}
+
+impl From<blstrs::G1Affine> for G1Affine {
+    fn from(p: blstrs::G1Affine) -> Self {
+        Self(p)
+    }
+}
+
+impl From<G1Projective> for blstrs::G1Projective {
+    fn from(p: G1Projective) -> Self {
+        p.0
     }
 }
 
@@ -585,6 +599,7 @@ impl ScalarMul for G1Projective {
     }
 }
 
+#[cfg(not(any(feature = "cuda", feature = "opencl")))]
 impl VariableBaseMSM for G1Projective {
     fn msm(bases: &[Self::MulBase], bigints: &[Self::ScalarField]) -> Result<Self, usize> {
         // NOTE vmx 2023-02-03: The bases are converted projective for the `blstrs` call.
@@ -600,6 +615,19 @@ impl VariableBaseMSM for G1Projective {
             &blstrs_bases,
             &blstrs_bigints,
         )))
+    }
+}
+
+#[cfg(any(feature = "cuda", feature = "opencl"))]
+impl VariableBaseMSM for G1Projective {
+    fn msm(bases: &[Self::MulBase], exponents: &[Self::ScalarField]) -> Result<Self, usize> {
+        let bigints = exponents
+            .iter()
+            .map(|exponent| exponent.into_bigint())
+            .collect::<Vec<_>>();
+        // It usually returns the minimum length of the bases or the exponents, depending on which
+        // one is less. We return `0` to indicate that it was a GPU error.
+        crate::gpu::msm(bases, &bigints).map_err(|_| 0)
     }
 }
 

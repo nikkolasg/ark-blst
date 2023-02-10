@@ -9,6 +9,8 @@ use ark_ec::{
     scalar_mul::{variable_base::VariableBaseMSM, ScalarMul},
     AffineRepr, CurveGroup, Group,
 };
+#[cfg(any(feature = "cuda", feature = "opencl"))]
+use ark_ff::PrimeField;
 use ark_ff::Zero;
 use ark_serialize::{
     CanonicalDeserialize, CanonicalSerialize, Compress, SerializationError, Valid, Validate,
@@ -577,6 +579,7 @@ impl ScalarMul for G2Projective {
     }
 }
 
+#[cfg(not(any(feature = "cuda", feature = "opencl")))]
 impl VariableBaseMSM for G2Projective {
     fn msm(bases: &[Self::MulBase], bigints: &[Self::ScalarField]) -> Result<Self, usize> {
         // NOTE vmx 2023-02-03: The bases are converted projective for the `blstrs` call.
@@ -592,6 +595,19 @@ impl VariableBaseMSM for G2Projective {
             &blstrs_bases,
             &blstrs_bigints,
         )))
+    }
+}
+
+#[cfg(any(feature = "cuda", feature = "opencl"))]
+impl VariableBaseMSM for G2Projective {
+    fn msm(bases: &[Self::MulBase], exponents: &[Self::ScalarField]) -> Result<Self, usize> {
+        let bigints = exponents
+            .iter()
+            .map(|exponent| exponent.into_bigint())
+            .collect::<Vec<_>>();
+        // It usually returns the minimum length of the bases or the exponents, depending on which
+        // one is less. We return `0` to indicate that it was a GPU error.
+        crate::gpu::msm(bases, &bigints).map_err(|_| 0)
     }
 }
 
