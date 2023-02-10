@@ -27,10 +27,10 @@ pub fn bench_group_msm<G: CurveGroup>(b: &mut Bencher) {
 fn group_addition_benchmark(c: &mut Criterion) {
     let mut group = c.benchmark_group("Group Addition Projective");
     group.bench_function("blst", |b| {
-        bench_group_addition::<ark_bls12_381::G1Projective>(b)
+        bench_group_addition::<ark_blst::G1Projective>(b)
     });
     group.bench_function("arkworks", |b| {
-        bench_group_addition::<ark_blst::G1Projective>(b)
+        bench_group_addition::<ark_bls12_381::G1Projective>(b)
     });
     group.finish();
 }
@@ -38,20 +38,20 @@ fn group_addition_benchmark(c: &mut Criterion) {
 fn group_multiplication_benchmark(c: &mut Criterion) {
     let mut group = c.benchmark_group("Group Multiplication");
     group.bench_function("blst", |b| {
-        bench_group_multiplication::<ark_bls12_381::G1Projective>(b)
+        bench_group_multiplication::<ark_blst::G1Projective>(b)
     });
     group.bench_function("arkworks", |b| {
-        bench_group_multiplication::<ark_blst::G1Projective>(b)
+        bench_group_multiplication::<ark_bls12_381::G1Projective>(b)
     });
     group.finish();
 }
 
 fn group_msm_benchmark(c: &mut Criterion) {
     let mut group = c.benchmark_group("Group MSM");
-    group.bench_function("blst", |b| {
+    group.bench_function("blst", |b| bench_group_msm::<ark_blst::G1Projective>(b));
+    group.bench_function("arkworks", |b| {
         bench_group_msm::<ark_bls12_381::G1Projective>(b)
     });
-    group.bench_function("arkworks", |b| bench_group_msm::<ark_blst::G1Projective>(b));
     group.finish();
 }
 
