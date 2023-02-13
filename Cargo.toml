@@ -26,6 +26,7 @@ byteorder = "1.4.3"
 group = "0.12.0"
 ark-crypto-primitives = { version = "^0.4", features = ["sponge","r1cs"] }
 rand_xorshift = "0.3.0"
+log = "0.4.17"
 
 [dev-dependencies]
 ark-algebra-test-templates = { version = "0.4.0" }
