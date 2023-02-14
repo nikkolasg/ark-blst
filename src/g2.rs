@@ -582,7 +582,6 @@ impl ScalarMul for G2Projective {
 #[cfg(not(any(feature = "cuda", feature = "opencl")))]
 impl VariableBaseMSM for G2Projective {
     fn msm(bases: &[Self::MulBase], bigints: &[Self::ScalarField]) -> Result<Self, usize> {
-        log::debug!("vmx: g2 cpu msm: start, size: {}", bases.len());
         // NOTE vmx 2023-02-03: The bases are converted projective for the `blstrs` call.
         // Internally it then converts it to affine again. A possible optimization is to implement
         // a `blstrs::G2Affine::multi_exp` that takes the scalars directly in affine
@@ -592,28 +591,23 @@ impl VariableBaseMSM for G2Projective {
             .map(|base| G2Projective::from(*base).0)
             .collect::<Vec<_>>();
         let blstrs_bigints = bigints.iter().map(|bigint| bigint.0).collect::<Vec<_>>();
-        let result = G2Projective(blstrs::G2Projective::multi_exp(
+        Ok(G2Projective(blstrs::G2Projective::multi_exp(
             &blstrs_bases,
             &blstrs_bigints,
-        ));
-        log::debug!("vmx: g2 cpu msm: stop");
-        Ok(result)
+        )))
     }
 }
 
 #[cfg(any(feature = "cuda", feature = "opencl"))]
 impl VariableBaseMSM for G2Projective {
     fn msm(bases: &[Self::MulBase], exponents: &[Self::ScalarField]) -> Result<Self, usize> {
-        log::debug!("vmx: g2 gpu msm: start, size: {}", bases.len());
         let bigints = exponents
             .iter()
             .map(|exponent| exponent.into_bigint())
             .collect::<Vec<_>>();
         // It usually returns the minimum length of the bases or the exponents, depending on which
         // one is less. We return `0` to indicate that it was a GPU error.
-        let result = crate::gpu::msm(bases, &bigints).map_err(|_| 0);
-        log::debug!("vmx: g2 gpu msm: stop");
-        result
+        crate::gpu::msm(bases, &bigints).map_err(|_| 0)
     }
 }
 
