@@ -677,6 +677,7 @@ mod tests {
     #[test]
     fn scalar() {
         crate::tests::field_test::<Scalar>();
+        crate::tests::compatibility::<Scalar, ark_bls12_381::Fr>();
     }
 
     #[test]

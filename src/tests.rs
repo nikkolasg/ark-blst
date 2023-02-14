@@ -2,6 +2,8 @@ use ark_ec::CurveGroup;
 use ark_ec::VariableBaseMSM;
 use ark_ff::Field;
 use ark_ff::UniformRand;
+use ark_serialize::CanonicalDeserialize;
+use ark_serialize::CanonicalSerialize;
 use std::ops::Neg;
 
 pub fn field_test<F: Field>() {
@@ -63,4 +65,32 @@ pub fn group_test<G: CurveGroup>() {
     // msm from crate
     let res = <G as VariableBaseMSM>::msm(&affines, &scalars).unwrap();
     assert_eq!(exp, res);
+}
+
+pub trait Serializable: Eq + UniformRand + CanonicalSerialize + CanonicalDeserialize {}
+
+impl<T> Serializable for T where T: Eq + UniformRand + CanonicalSerialize + CanonicalDeserialize {}
+pub fn compatibility<E1: Serializable, E2: Serializable>() {
+    let e1 = E1::rand(&mut rand::thread_rng());
+    let e2 = E2::rand(&mut rand::thread_rng());
+
+    // Check if reading serialized element of E1 via E2 gives back same serialization
+    let mut v1 = Vec::new();
+    e1.serialize_compressed(&mut v1).expect("this should work");
+    let read_1 = E2::deserialize_compressed(&v1[..]).expect("deserialize doesn't work");
+    let mut written_1 = Vec::new();
+    read_1
+        .serialize_compressed(&mut written_1)
+        .expect("serializable didnt work");
+    assert_eq!(v1, written_1);
+
+    // Check if reading serialized element of E2 via E1 gives back same serialization
+    let mut v2 = Vec::new();
+    e2.serialize_compressed(&mut v2).expect("this should work");
+    let read_2 = E1::deserialize_compressed(&v2[..]).expect("deserialize doesn't work");
+    let mut written_2 = Vec::new();
+    read_2
+        .serialize_compressed(&mut written_2)
+        .expect("serializable didnt work");
+    assert_eq!(v2, written_2);
 }

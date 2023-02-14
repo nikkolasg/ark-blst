@@ -675,5 +675,6 @@ mod test {
     #[test]
     fn g1() {
         group_test::<G1Projective>();
+        crate::tests::compatibility::<G1Projective, ark_bls12_381::G1Projective>();
     }
 }
