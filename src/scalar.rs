@@ -677,7 +677,9 @@ mod tests {
     #[test]
     fn scalar() {
         crate::tests::field_test::<Scalar>();
-        crate::tests::compatibility::<Scalar, ark_bls12_381::Fr>();
+        crate::tests::serialization_compatibility::<Scalar, ark_bls12_381::Fr>();
+        let ark_one = Scalar::from(ark_bls12_381::Fr::one());
+        assert_eq!(ark_one, Scalar::one());
     }
 
     #[test]

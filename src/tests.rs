@@ -70,7 +70,7 @@ pub fn group_test<G: CurveGroup>() {
 pub trait Serializable: Eq + UniformRand + CanonicalSerialize + CanonicalDeserialize {}
 
 impl<T> Serializable for T where T: Eq + UniformRand + CanonicalSerialize + CanonicalDeserialize {}
-pub fn compatibility<E1: Serializable, E2: Serializable>() {
+pub fn serialization_compatibility<E1: Serializable, E2: Serializable>() {
     let e1 = E1::rand(&mut rand::thread_rng());
     let e2 = E2::rand(&mut rand::thread_rng());
 

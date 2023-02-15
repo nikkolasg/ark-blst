@@ -671,10 +671,34 @@ impl Neg for G1Projective {
 mod test {
     use super::*;
     use crate::tests::group_test;
+    use ark_ff::UniformRand;
 
     #[test]
     fn g1() {
         group_test::<G1Projective>();
-        crate::tests::compatibility::<G1Projective, ark_bls12_381::G1Projective>();
+        crate::tests::serialization_compatibility::<G1Projective, ark_bls12_381::G1Projective>();
+    }
+
+    #[test]
+    fn msm_with_zero() {
+        let result = custom_msm::<G1Projective>();
+        assert!(!result.is_zero());
+        let result = custom_msm::<ark_bls12_381::G1Projective>();
+        assert!(!result.is_zero());
+    }
+
+    fn custom_msm<G: CurveGroup>() -> G {
+        let npoint = 10;
+        let nzero = 3;
+        let nscalars = npoint + nzero;
+        let bases = (0..npoint)
+            .map(|_| G::rand(&mut rand::thread_rng()))
+            .chain(vec![G::zero(); nzero].into_iter())
+            .collect::<Vec<_>>();
+        let scalars = (0..nscalars)
+            .map(|_| G::ScalarField::rand(&mut rand::thread_rng()))
+            .collect::<Vec<_>>();
+        let affines = G::normalize_batch(&bases);
+        G::msm(&affines, &scalars).unwrap()
     }
 }
