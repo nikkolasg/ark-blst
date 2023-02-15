@@ -680,14 +680,16 @@ mod test {
     }
 
     #[test]
-    fn msm_with_zero() {
-        let result = custom_msm::<G1Projective>();
-        assert!(!result.is_zero());
-        let result = custom_msm::<ark_bls12_381::G1Projective>();
-        assert!(!result.is_zero());
+    fn msm_with_zero_blst() {
+        custom_msm::<G1Projective>();
     }
 
-    fn custom_msm<G: CurveGroup>() -> G {
+    #[test]
+    fn msm_with_zero_arkworks() {
+        custom_msm::<ark_bls12_381::G1Projective>();
+    }
+
+    fn custom_msm<G: CurveGroup>() {
         let npoint = 10;
         let nzero = 3;
         let nscalars = npoint + nzero;
@@ -699,6 +701,7 @@ mod test {
             .map(|_| G::ScalarField::rand(&mut rand::thread_rng()))
             .collect::<Vec<_>>();
         let affines = G::normalize_batch(&bases);
-        G::msm(&affines, &scalars).unwrap()
+        let result = G::msm(&affines, &scalars).unwrap();
+        assert!(!result.is_zero());
     }
 }
