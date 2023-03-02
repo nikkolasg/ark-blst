@@ -671,9 +671,40 @@ impl Neg for G1Projective {
 mod test {
     use super::*;
     use crate::tests::group_test;
+    use ark_ff::UniformRand;
 
     #[test]
     fn g1() {
         group_test::<G1Projective>();
+        crate::tests::serialization_compatibility::<G1Projective, ark_bls12_381::G1Projective>();
+    }
+
+    // Unfortunately https://github.com/supranational/blst/blob/146dfa2e67a5cf87ff1e6cc41ea10f51f675a0fd/src/multi_scalar.c#L11
+    // is a reality so inputs containing 0 points fail.
+    #[ignore]
+    #[test]
+    fn msm_with_zero_blst() {
+        custom_msm::<G1Projective>();
+    }
+
+    #[test]
+    fn msm_with_zero_arkworks() {
+        custom_msm::<ark_bls12_381::G1Projective>();
+    }
+
+    fn custom_msm<G: CurveGroup>() {
+        let npoint = 10;
+        let nzero = 3;
+        let nscalars = npoint + nzero;
+        let bases = (0..npoint)
+            .map(|_| G::rand(&mut rand::thread_rng()))
+            .chain(vec![G::zero(); nzero].into_iter())
+            .collect::<Vec<_>>();
+        let scalars = (0..nscalars)
+            .map(|_| G::ScalarField::rand(&mut rand::thread_rng()))
+            .collect::<Vec<_>>();
+        let affines = G::normalize_batch(&bases);
+        let result = G::msm(&affines, &scalars).unwrap();
+        assert!(!result.is_zero());
     }
 }

@@ -733,5 +733,6 @@ mod test {
     #[test]
     fn g2() {
         group_test::<G2Projective>();
+        crate::tests::serialization_compatibility::<G2Projective, ark_bls12_381::G2Projective>();
     }
 }
