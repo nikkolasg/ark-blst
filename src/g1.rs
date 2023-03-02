@@ -679,6 +679,9 @@ mod test {
         crate::tests::serialization_compatibility::<G1Projective, ark_bls12_381::G1Projective>();
     }
 
+    // Unfortunately https://github.com/supranational/blst/blob/146dfa2e67a5cf87ff1e6cc41ea10f51f675a0fd/src/multi_scalar.c#L11
+    // is a reality so inputs containing 0 points fail.
+    #[ignore]
     #[test]
     fn msm_with_zero_blst() {
         custom_msm::<G1Projective>();
