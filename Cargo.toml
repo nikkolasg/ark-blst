@@ -56,7 +56,9 @@ cuda = ["blstrs/gpu", "dep:ec-gpu", "dep:ec-gpu-gen", "ec-gpu-gen?/cuda"]
 opencl = ["blstrs/gpu", "dep:ec-gpu", "dep:ec-gpu-gen", "ec-gpu-gen?/opencl"]
 
 [patch.crates-io]
-blstrs = { git = "https://github.com/nikkolasg/blstrs", branch = "feat/arkwork" }
-ark-ec = { git = "https://github.com/vmx/algebra", branch = "affine-repr-xy-owned" }
-ark-ff = { git = "https://github.com/vmx/algebra", branch = "affine-repr-xy-owned" }
-ark-serialize = { git = "https://github.com/vmx/algebra", branch = "affine-repr-xy-owned" }
+#ark-ec = { git = "https://github.com/vmx/algebra", branch = "affine-repr-xy-owned" }
+#ark-ff = { git = "https://github.com/vmx/algebra", branch = "affine-repr-xy-owned" }
+#ark-serialize = { git = "https://github.com/vmx/algebra", branch = "affine-repr-xy-owned" }
+ark-ec = { git = "https://github.com/nikkolasg/arkwork-algebra", branch = "working-affine" }
+ark-ff = { git = "https://github.com/nikkolasg/arkwork-algebra", branch = "working-affine" }
+ark-serialize = { git = "https://github.com/nikkolasg/arkwork-algebra", branch = "working-affine" }
